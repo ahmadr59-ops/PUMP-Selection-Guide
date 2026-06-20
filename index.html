@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API610 Pump Selector</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<link rel="stylesheet" href="./css/main.css">
+</head>
+
+<body class="bg-gray-100">
+
+<div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold text-blue-800 mb-6">
+        API610 Pump Selector — Modular Architecture
+    </h1>
+
+    <div class="bg-white rounded-xl shadow p-6">
+        <button id="suggestPumpBtn"
+            class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded">
+            Suggest Pump
+        </button>
+
+        <div id="resultTab" class="mt-6"></div>
+    </div>
+</div>
+
+<script src="./js/data/constants.js"></script>
+<script src="./js/data/pumpTypes.js"></script>
+<script src="./js/data/referenceLibrary.js"></script>
+
+<script src="./js/utils/helpers.js"></script>
+
+<script src="./js/core/calculations.js"></script>
+<script src="./js/core/selector.js"></script>
+<script src="./js/core/validation.js"></script>
+<script src="./js/core/importExport.js"></script>
+
+<script src="./js/storage/localStorage.js"></script>
+<script src="./js/storage/projectManager.js"></script>
+
+<script src="./js/ui/forms.js"></script>
+<script src="./js/ui/history.js"></script>
+<script src="./js/ui/referenceLibrary.js"></script>
+<script src="./js/ui/charts.js"></script>
+
+<script src="./js/app.js"></script>
+
+</body>
+</html>
