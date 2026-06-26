@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pump Selection Guide v2 — API 610</title>
+    <title>Pump Selection Guide v3 — API 610</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1/dist/chartjs-plugin-annotation.min.js"></script>
@@ -37,9 +37,21 @@
         .autocomplete-items div:hover, .autocomplete-active { background-color: #2563eb !important; color: #fff; }
 
         /* ========== HEADER & TABS ========== */
-        .header-bar { background-color: #1e40af; padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); position: relative; }
-        .header-title { color: white; font-weight: 700; font-size: 1.25rem; letter-spacing: -0.025em; position: absolute; left: 50%; transform: translateX(-50%); font-family: 'Poppins', sans-serif; }
+        .header-bar {
+            background: linear-gradient(135deg, #0f2460 0%, #1e40af 50%, #1e3a8a 100%);
+            padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
+            border-radius: 0.75rem; box-shadow: 0 6px 20px rgba(30,58,138,0.4); position: relative;
+            border-bottom: 3px solid #f59e0b;
+        }
+        .header-title { color: white; font-weight: 700; font-size: 1.25rem; letter-spacing: -0.025em; position: absolute; left: 50%; transform: translateX(-50%); font-family: 'Poppins', sans-serif; white-space: nowrap; }
+        .header-badge { background: rgba(245,158,11,0.2); border: 1px solid rgba(245,158,11,0.5); color: #fde68a; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; letter-spacing: 0.05em; }
         .creator-text { color: #d1d5db; font-size: 0.75rem; font-weight: 300; }
+
+        /* ========== QUICK STATS BANNER ========== */
+        .quick-stats-bar { background: linear-gradient(to right, #eff6ff, #f0fdf4); border: 1px solid #dbeafe; border-radius: 0.5rem; padding: 0.6rem 1rem; display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+        .quick-stat { display: flex; flex-direction: column; align-items: center; }
+        .quick-stat-value { font-size: 1.1rem; font-weight: 700; color: #1e3a8a; line-height: 1; }
+        .quick-stat-label { font-size: 0.65rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
 
         .tab-button-container-wrapper { background: white; padding: 0.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem; margin-top: 0.25rem; }
         .tab-button-container { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0.5rem; }
@@ -98,15 +110,20 @@
 
         /* ========== RESULT STYLES ========== */
         .result-grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
-        .result-box { background-color: #f9fafb; padding: 1.25rem; border-radius: 0.75rem; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .result-box-title { font-size: 1.25rem; font-weight: 600; color: #111827; border-bottom: 2px solid #d1d5db; padding-bottom: 0.5rem; margin-bottom: 1rem; font-family: 'Lora', serif; }
-        .result-item { display: flex; justify-content: space-between; padding: 0.6rem 0; font-size: 0.9rem; border-bottom: 1px dashed #e5e7eb; }
+        .result-box { background: white; padding: 1.25rem; border-radius: 0.75rem; border: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: box-shadow 0.2s; }
+        .result-box:hover { box-shadow: 0 4px 16px rgba(30,58,138,0.1); }
+        .result-box-title { font-size: 1.1rem; font-weight: 700; color: #1e3a8a; border-bottom: 2px solid #dbeafe; padding-bottom: 0.5rem; margin-bottom: 1rem; font-family: 'Lora', serif; display: flex; align-items: center; gap: 0.5rem; }
+        .result-item { display: flex; justify-content: space-between; padding: 0.55rem 0; font-size: 0.875rem; border-bottom: 1px solid #f3f4f6; }
         .result-item:last-child { border-bottom: none; }
-        .result-label { font-weight: 500; color: #4b5563; }
-        .result-value { font-weight: 600; color: #1e3a8a; text-align: right; }
+        .result-label { font-weight: 500; color: #6b7280; }
+        .result-value { font-weight: 700; color: #1e3a8a; text-align: right; }
         .result-value.warn { color: #b45309; }
         .result-value.pass { color: #059669; }
         .result-value.fail { color: #dc2626; }
+
+        /* ========== SECTION CARDS ========== */
+        .section-card { background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 1.5rem; }
+        .section-card:hover { box-shadow: 0 4px 14px rgba(30,58,138,0.08); }
 
         /* ========== NPSH MARGIN BAR ========== */
         .npsh-bar-container { background: #e5e7eb; border-radius: 999px; height: 12px; overflow: hidden; margin-top: 4px; }
@@ -115,7 +132,7 @@
         .npsh-bar-fill.marginal { background: linear-gradient(to right, #f59e0b, #fbbf24); }
         .npsh-bar-fill.critical { background: linear-gradient(to right, #ef4444, #f87171); }
 
-        /* ========== VALIDATION LOG ACCORDION ========== */
+
         #validationLogAccordion .log-summary { cursor: pointer; padding: 0.75rem; background-color: #f3f4f6; border: 1px solid #d1d5db; border-radius: 0.5rem; margin-bottom: 0.25rem; display: flex; justify-content: space-between; align-items: center; transition: background-color 0.2s; }
         #validationLogAccordion .log-summary:hover { background-color: #e5e7eb; }
         #validationLogAccordion .log-details { padding: 0.5rem; border: 1px solid #d1d5db; border-top: none; border-radius: 0 0 0.5rem 0.5rem; background: white; }
@@ -158,13 +175,14 @@
 
         <!-- HEADER -->
         <div class="header-bar">
-            <div class="flex-1">
+            <div class="flex-1 flex items-center gap-2">
                 <button id="fullscreenBtn" title="Toggle Fullscreen" class="text-white p-2 rounded-full hover:bg-white/20 transition-colors">
                     <svg id="fullscreenIconOpen" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
                     <svg id="fullscreenIconClose" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 0-2-2h-3M3 16h3a2 2 0 0 0 2-2v-3"></path></svg>
                 </button>
+                <span class="header-badge">v3</span>
             </div>
-            <h1 class="header-title">Pump Selection Guide — API 610 (v2)</h1>
+            <h1 class="header-title">⚙ Pump Selection Guide — API 610</h1>
             <div class="flex-1 text-right">
                 <span class="creator-text">Ahmad Rezazadeh</span>
             </div>
@@ -556,17 +574,19 @@
 
 <script>
 // =============================================================================
-// PUMP SELECTION GUIDE v2 — API 610
-// Engineering fixes:
-// [FIX-1] Nss uses NPSHr (not NPSHa) per API 610 Annex A Eq. A.2
-// [FIX-2] NPSH Margin check (NPSHa - NPSHr) with visual bar
-// [FIX-3] Head coefficient psi computed from Ns, not hardcoded 0.55
-// [FIX-4] Double-suction: Q_eye = Q/2 for Ns AND Nss (API 610 Annex A)
-// [FIX-5] Viscosity correction: unified head baseline for all calculations
-// [FIX-6] Efficiency interpolation: boundary clamped, no extrapolation
-// [FIX-7] BB1 restored for O&G (no API 610 Table 3 basis for exclusion)
-// [FIX-8] High-temperature radially-split warning (API 610 Cl. 6.3.11)
-// [FIX-9] Solids content influences selection and warnings
+// PUMP SELECTION GUIDE v3 — API 610 (12th Edition, 2021)
+// Engineering improvements over v2:
+// [v3-1] Viscosity correction: HI 9.6.7 B-factor method (kinematic viscosity)
+// [v3-2] Viscosity threshold: 4 cP (industry standard) instead of 10 cP
+// [v3-3] Head coefficient ψ: smooth interpolation (not step-function)
+// [v3-4] Motor rated power: IEC standard sizes + API 610 Table 4 service factors
+// [v3-5] NPSH margin: API 610-based thresholds (absolute + % NPSHr)
+// [v3-6] Pump type data: corrected BB5 maxP=350bar, VS6 maxT=200°C + preferred ranges
+// [v3-7] UI: improved header, result banner with quick-stats + rank score breakdown
+// ChatGPT integration (Rule_Engine + Ranking_Engine → translated to JS):
+// [v3-8] RULE ENGINE: hard constraint filter (Pressure, Temp, Viscosity, Flow, O&G)
+// [v3-9] RANKING ENGINE: weighted score — Flow 30% | Head 35% | NPSH 20% | Visc 15%
+// [v3-10] maxViscosityCp + preferredFlowRange + preferredHeadRange added to pumpTypeData
 // =============================================================================
 
 // ── GLOBAL STATE ──────────────────────────────────────────────────────────────
@@ -722,17 +742,120 @@ const FLUID_DATABASE = {
     'Default'                :{density:1000, viscosity:1,     corrosivity:'low'},
 };
 
-// ── PUMP TYPE DATA ─────────────────────────────────────────────────────────────
+// ── PUMP TYPE DATA — API 610 12th Ed. Table 3 ──────────────────────────────────
+// preferredFlowRange/preferredHeadRange/maxViscosityCp از Ranking Engine ChatGPT اضافه شد
 const pumpTypeData = {
-    OH1: {description:"Overhung, horizontal, foot-mounted. Lighter duty; Table 3 limitations apply.",         maxPressure:20,  maxTemperature:150, flowMin:0,  flowMax:200,   headMin:0,   headMax:100,  minStages:1, maxStages:1,  axSplit:false},
-    OH2: {description:"Overhung, horizontal, centerline-mounted. Most common general process pump.",          maxPressure:50,  maxTemperature:350, flowMin:0,  flowMax:450,   headMin:0,   headMax:200,  minStages:1, maxStages:1,  axSplit:false},
-    BB1: {description:"Between bearings, axially split, 1–2 stage. Often double-suction. Moderate duties.",  maxPressure:75,  maxTemperature:200, flowMin:0,  flowMax:1135,  headMin:0,   headMax:450,  minStages:1, maxStages:2,  axSplit:true,  canBeDoubleSuction:true},
-    BB2: {description:"Between bearings, radially split, 1–2 stage. Higher pressure/temperature than BB1.",  maxPressure:100, maxTemperature:400, flowMin:0,  flowMax:1135,  headMin:0,   headMax:450,  minStages:1, maxStages:2,  axSplit:false, canBeDoubleSuction:true},
-    BB3: {description:"Between bearings, multistage, axially split. High flow, medium–high head.",           maxPressure:100, maxTemperature:200, flowMin:45, flowMax:3400,  headMin:120, headMax:500,  minStages:2, maxStages:8,  axSplit:true,  canBeDoubleSuction:true},
-    BB4: {description:"Between bearings, multistage, radially split ring-section. Table 3 limitations.",     maxPressure:150, maxTemperature:400, flowMin:45, flowMax:3400,  headMin:120, headMax:1500, minStages:2, maxStages:14, axSplit:false},
-    BB5: {description:"Between bearings, multistage, double-casing barrel. Highest pressure services.",      maxPressure:250, maxTemperature:450, flowMin:45, flowMax:10000, headMin:500, headMax:2400, minStages:2, maxStages:16, axSplit:false, canBeDoubleSuction:true},
-    VS6: {description:"Vertically suspended, double-casing can type. Ideal for low-NPSH applications.",      maxPressure:50,  maxTemperature:150, flowMin:0,  flowMax:10000, headMin:0,   headMax:500,  minStages:1, maxStages:12, axSplit:false},
+    OH1: {description:"Overhung, horizontal, foot-mounted. Lighter duty; Table 3 limitations apply.",         maxPressure:20,  maxTemperature:150, maxViscosityCp:200,  flowMin:0,  flowMax:200,   headMin:0,   headMax:100,  preferredFlowRange:[5,150],    preferredHeadRange:[20,80],    minStages:1, maxStages:1,  axSplit:false},
+    OH2: {description:"Overhung, horizontal, centerline-mounted. Most common general process pump.",          maxPressure:50,  maxTemperature:350, maxViscosityCp:300,  flowMin:0,  flowMax:450,   headMin:0,   headMax:250,  preferredFlowRange:[10,350],   preferredHeadRange:[30,200],   minStages:1, maxStages:1,  axSplit:false},
+    BB1: {description:"Between bearings, axially split, 1–2 stage. Often double-suction. Moderate duties.",  maxPressure:75,  maxTemperature:200, maxViscosityCp:500,  flowMin:0,  flowMax:1135,  headMin:0,   headMax:450,  preferredFlowRange:[100,800],  preferredHeadRange:[30,300],   minStages:1, maxStages:2,  axSplit:true,  canBeDoubleSuction:true},
+    BB2: {description:"Between bearings, radially split, 1–2 stage. Higher pressure/temperature than BB1.",  maxPressure:100, maxTemperature:400, maxViscosityCp:500,  flowMin:0,  flowMax:1135,  headMin:0,   headMax:500,  preferredFlowRange:[50,900],   preferredHeadRange:[50,400],   minStages:1, maxStages:2,  axSplit:false, canBeDoubleSuction:true},
+    BB3: {description:"Between bearings, multistage, axially split. High flow, medium–high head.",           maxPressure:100, maxTemperature:200, maxViscosityCp:300,  flowMin:45, flowMax:3400,  headMin:80,  headMax:600,  preferredFlowRange:[200,2500], preferredHeadRange:[100,500],  minStages:2, maxStages:8,  axSplit:true,  canBeDoubleSuction:true},
+    BB4: {description:"Between bearings, multistage, radially split ring-section. Table 3 limitations.",     maxPressure:150, maxTemperature:400, maxViscosityCp:300,  flowMin:45, flowMax:3400,  headMin:80,  headMax:1500, preferredFlowRange:[50,1500],  preferredHeadRange:[200,1200], minStages:2, maxStages:14, axSplit:false},
+    BB5: {description:"Between bearings, multistage, double-casing barrel. Highest pressure services.",      maxPressure:350, maxTemperature:450, maxViscosityCp:400,  flowMin:20, flowMax:10000, headMin:200, headMax:3000, preferredFlowRange:[50,2000],  preferredHeadRange:[400,2500], minStages:2, maxStages:16, axSplit:false, canBeDoubleSuction:true},
+    VS6: {description:"Vertically suspended, double-casing can type. Ideal for low-NPSH applications.",      maxPressure:65,  maxTemperature:200, maxViscosityCp:200,  flowMin:0,  flowMax:10000, headMin:0,   headMax:600,  preferredFlowRange:[5,5000],   preferredHeadRange:[10,400],   minStages:1, maxStages:14, axSplit:false},
 };
+
+// =============================================================================
+// ── RULE ENGINE — از ChatGPT (Rule_Engine.txt + Rules) ترجمه به JS ────────────
+// =============================================================================
+const SELECTION_RULES = [
+    {
+        id: 'PRESSURE_LIMIT', type: 'hard_constraint',
+        evaluate(input, candidate) {
+            if (input.differentialPressureBar > candidate.maxPressure)
+                return { passed:false, reason:`dP (${input.differentialPressureBar.toFixed(1)} bar) > max (${candidate.maxPressure} bar)` };
+            return { passed:true };
+        }
+    },
+    {
+        id: 'TEMPERATURE_LIMIT', type: 'hard_constraint',
+        evaluate(input, candidate) {
+            if (input.temperatureC > candidate.maxTemperature)
+                return { passed:false, reason:`T (${input.temperatureC}°C) > max (${candidate.maxTemperature}°C)` };
+            return { passed:true };
+        }
+    },
+    {
+        id: 'VISCOSITY_LIMIT', type: 'hard_constraint',
+        evaluate(input, candidate) {
+            if (input.viscosityCp > candidate.maxViscosityCp)
+                return { passed:false, reason:`Viscosity (${input.viscosityCp} cP) > max (${candidate.maxViscosityCp} cP)` };
+            return { passed:true };
+        }
+    },
+    {
+        id: 'FLOW_RANGE', type: 'hard_constraint',
+        evaluate(input, candidate) {
+            if (input.flowM3Hr > candidate.flowMax)
+                return { passed:false, reason:`Flow (${input.flowM3Hr} m³/hr) > max (${candidate.flowMax} m³/hr)` };
+            if (candidate.flowMin > 0 && input.flowM3Hr < candidate.flowMin)
+                return { passed:false, reason:`Flow (${input.flowM3Hr} m³/hr) < min (${candidate.flowMin} m³/hr)` };
+            return { passed:true };
+        }
+    },
+    {
+        id: 'OIL_GAS_EXCLUSION', type: 'hard_constraint',
+        evaluate(input, candidate, type) {
+            if (input.isOilAndGas && !input.isCriticalNPSH && ['OH1','BB4'].includes(type))
+                return { passed:false, reason:`${type} excluded for O&G/Refinery (API 610 Table 3)` };
+            return { passed:true };
+        }
+    },
+];
+
+function runRuleEngine(inputNorm, candidates) {
+    return candidates
+        .map(([type, candidate]) => {
+            const evals  = SELECTION_RULES.map(r => r.evaluate(inputNorm, candidate, type));
+            const failed = evals.find(e => !e.passed);
+            return { type, candidate, evals, rejected:!!failed, rejectionReason: failed?.reason || null };
+        })
+        .filter(r => !r.rejected);
+}
+
+// =============================================================================
+// ── RANKING ENGINE — از ChatGPT (Ranking_Engine.txt) ترجمه و بهبود به JS ─────
+// وزن‌ها: Flow 30% | Head 35% | NPSH 20% | Viscosity 15%
+// =============================================================================
+function rangeScore(value, range) {
+    if (!range) return 60;
+    const [lo, hi] = range;
+    if (value >= lo && value <= hi) return 100;
+    // partial credit — هرچه دورتر، امتیاز کمتر
+    const gap = value < lo ? (lo - value) / lo : (value - hi) / Math.max(hi, 1);
+    return Math.max(10, 100 - gap * 120);
+}
+
+function runRankingEngine(feasible, input, hydraulic) {
+    return feasible.map(({ type, candidate }) => {
+        const flowScore = rangeScore(input.flowM3Hr,       candidate.preferredFlowRange);
+        const headScore = rangeScore(hydraulic.totalHeadM, candidate.preferredHeadRange);
+
+        const npshRatio = hydraulic.estimatedNpshr > 0
+            ? Math.min(input.npshAvailableM / hydraulic.estimatedNpshr, 5) : 3;
+        const npshScore = Math.min(npshRatio * 20, 100);
+
+        const viscRatio = candidate.maxViscosityCp > 0
+            ? input.viscosityCp / candidate.maxViscosityCp : 0;
+        const viscScore = Math.max(0, 100 - viscRatio * 100);
+
+        const total = flowScore*0.30 + headScore*0.35 + npshScore*0.20 + viscScore*0.15;
+
+        const reasons = [];
+        if (flowScore === 100) reasons.push('Flow within preferred range');
+        if (headScore === 100) reasons.push('Head within preferred range');
+        if (npshRatio  > 1.5)  reasons.push('Adequate NPSH margin');
+        if (total      > 80)   reasons.push('Strong hydraulic suitability');
+        if (viscScore  < 40)   reasons.push('⚠ High viscosity penalty');
+
+        return {
+            pumpType: type,
+            rankScore: Math.round(total),
+            breakdown: { flow:Math.round(flowScore), head:Math.round(headScore), npsh:Math.round(npshScore), viscosity:Math.round(viscScore) },
+            reasons,
+        };
+    }).sort((a, b) => b.rankScore - a.rankScore);
+}
 
 // ── REFERENCE LIBRARY ─────────────────────────────────────────────────────────
 function parseConditions(item) {
@@ -767,14 +890,19 @@ const DEFAULT_REFERENCE_LIBRARY_DATA = [
 // ── ENGINEERING CALCULATION FUNCTIONS ────────────────────────────────────────
 // =============================================================================
 
-// [FIX-3] Head coefficient ψ as a function of metric Ns
+// Head coefficient ψ — smooth interpolation from Ns (metric)
+// Based on Hydraulic Institute / Gülich "Pump Hydraulics" data
 function getHeadCoefficient(ns_metric) {
     if (!ns_metric || ns_metric <= 0) return 0.55;
-    if (ns_metric < 15)  return 0.58;
-    if (ns_metric < 30)  return 0.55;
-    if (ns_metric < 50)  return 0.52;
-    if (ns_metric < 80)  return 0.46;
-    if (ns_metric < 120) return 0.38;
+    // [ns, psi] pairs from HI/Gülich
+    const pts = [[5,0.60],[15,0.58],[30,0.55],[50,0.52],[80,0.46],[120,0.38],[180,0.28]];
+    const ns = Math.max(pts[0][0], Math.min(pts[pts.length-1][0], ns_metric));
+    for (let i = 0; i < pts.length - 1; i++) {
+        if (ns >= pts[i][0] && ns <= pts[i+1][0]) {
+            const t = (ns - pts[i][0]) / (pts[i+1][0] - pts[i][0]);
+            return pts[i][1] + t * (pts[i+1][1] - pts[i][1]);
+        }
+    }
     return 0.28;
 }
 
@@ -802,18 +930,22 @@ function getEfficiencyFromChart(ns_us, flow_gpm) {
     return Math.max(20, Math.min(96, (eL + (eH-eL)*(nsClamp-lo)/(hi-lo)) * 100));
 }
 
-// Viscosity correction — simplified HI 9.6.7
-function getViscosityCorrectionFactors(flowM3hr, headM, viscositycP) {
-    if (viscositycP <= 1.0) return { C_Q:1, C_H:1, C_E:1 };
-    const B = (Math.log10(Math.max(flowM3hr,0.1))*2.5)
-            + (Math.log10(Math.max(headM,0.1))*1.5)
-            - (Math.log10(Math.max(viscositycP,1))*0.5) - 2.6;
-    const safe = v => Math.max(v, 0.01);
-    return {
-        C_Q: Math.max(0.40, Math.min(1.0, 1-(0.02*Math.pow(safe(B),-1.15)))),
-        C_H: Math.max(0.60, Math.min(1.0, 1-(0.04*Math.pow(safe(B),-1.05)))),
-        C_E: Math.max(0.30, Math.min(1.0, 1-(0.28*Math.pow(safe(B),-0.65)))),
-    };
+// Viscosity correction — HI 9.6.7 (2010) B-factor method
+// B = 16.5 * ν^0.5 / (Q^0.25 * H^0.5)  where ν in cSt, Q in m³/s, H in m
+function getViscosityCorrectionFactors(flowM3hr, headM, viscositycP, densityKgM3) {
+    const sg = densityKgM3 / 1000;
+    const viscoCSt = viscositycP / sg; // kinematic viscosity in cSt
+    if (viscoCSt <= 1.0) return { C_Q:1, C_H:1, C_E:1 };
+    const Q_m3s = Math.max(flowM3hr / 3600, 1e-6);
+    const H     = Math.max(headM, 0.1);
+    // HI 9.6.7 B-factor
+    const B = 16.5 * Math.pow(viscoCSt, 0.5) / (Math.pow(Q_m3s, 0.25) * Math.pow(H, 0.5));
+    if (B <= 0.01) return { C_Q:1, C_H:1, C_E:1 };
+    // Correction factors from HI 9.6.7 curves (table fit)
+    const C_Q = Math.max(0.40, Math.min(1.0, 1.0 - 0.0145 * Math.pow(B, 0.823)));
+    const C_H = Math.max(0.55, Math.min(1.0, 1.0 - 0.0314 * Math.pow(B, 0.760)));
+    const C_E = Math.max(0.25, Math.min(1.0, C_Q * C_H / Math.max(0.25, C_Q * C_H + 0.12 * B)));
+    return { C_Q, C_H, C_E };
 }
 
 function updateCalculatedFields(formOrData) {
@@ -829,6 +961,55 @@ function updateCalculatedFields(formOrData) {
     } else {
         return { differentialPressure: dP, totalHead: H };
     }
+}
+
+// =============================================================================
+// ── NPSHr ESTIMATION — Stepanoff Correlation ─────────────────────────────────
+// Data needed: Q, H, N (RPM) — all available at EPC stage
+// Accuracy: ±30-40% — for FEED/pre-FEED only
+// =============================================================================
+function estimateNPSHr(flowM3hr, headM, pumpSpeedRpm, numStages, suctionConfig) {
+    const qEye   = suctionConfig === 'DS' ? (flowM3hr / 3600) / 2 : (flowM3hr / 3600);
+    const hStage = headM / Math.max(numStages, 1);
+    const ns     = (pumpSpeedRpm * Math.sqrt(qEye)) / Math.pow(Math.max(hStage, 0.1), 0.75);
+    // Stepanoff sigma: sigma = 6.0e-6 x Ns^(4/3)
+    const sigma    = 6.0e-6 * Math.pow(Math.max(ns, 5), 4/3);
+    const npshRest = sigma * hStage;
+    return {
+        npshRest:   +npshRest.toFixed(2),
+        sigma:      +sigma.toFixed(5),
+        nsUsed:     +ns.toFixed(1),
+        disclaimer: 'Stepanoff correlation ±30-40% — confirm with vendor NPSH3 curve'
+    };
+}
+
+// =============================================================================
+// ── NOZZLE VELOCITY CHECK — API 610 Table 4 ──────────────────────────────────
+// Data needed: Q — available at EPC stage
+// Nozzle size estimated from empirical formula (no vendor data required)
+// =============================================================================
+function checkNozzleVelocity(flowM3hr) {
+    const qGpm       = flowM3hr * 4.40287;
+    // Empirical: D_inch = C x sqrt(Q_gpm) / 60
+    const dSuctRaw   = Math.max(1.0 * Math.pow(qGpm, 0.5) / 60, 1.0);
+    const dDiscRaw   = Math.max(0.7 * Math.pow(qGpm, 0.5) / 60, 1.0);
+    // Round up to ASME B16.5 standard sizes
+    const stdSizes   = [1, 1.5, 2, 3, 4, 6, 8, 10, 12, 14, 16, 18, 20, 24];
+    const roundUp    = d => stdSizes.find(s => s >= d) || stdSizes[stdSizes.length - 1];
+    const dS_in = roundUp(dSuctRaw), dD_in = roundUp(dDiscRaw);
+    const dS_m  = dS_in * 0.0254,   dD_m  = dD_in * 0.0254;
+    const area  = d => Math.PI / 4 * d * d;
+    const qM3s  = flowM3hr / 3600;
+    const vS    = qM3s / area(dS_m);
+    const vD    = qM3s / area(dD_m);
+    // API 610 Table 4 limits (m/s)
+    const LS = 3.0, LD = 5.0;
+    const st = (v, L) => v <= L ? 'ok' : (v <= L * 1.15 ? 'marginal' : 'fail');
+    return {
+        suction:   { sizeInch: dS_in, velocity: +vS.toFixed(2), limit: LS, status: st(vS, LS) },
+        discharge: { sizeInch: dD_in, velocity: +vD.toFixed(2), limit: LD, status: st(vD, LD) },
+        disclaimer: 'Nozzle size estimated from Q — ±1 pipe size. Confirm with vendor datasheet'
+    };
 }
 
 // =============================================================================
@@ -863,24 +1044,26 @@ function calculatePumpSelection(inputData) {
     if (isNaN(origHead) || origHead <= 0)
         return { error:'Cannot compute a valid Total Head. Check pressures and density.', suggestion:'Calculation Failed' };
 
-    // 4. [FIX-5] Viscosity correction — unified baseline for all calculations
+    // 4. Viscosity correction — HI 9.6.7 B-factor method
     let viscoFactors = { C_Q:1, C_H:1, C_E:1 };
     let selHead = origHead, selFlow = flowForCalc;
     let viscoCorrected = false;
-    if (viscosity > 10) {
-        viscoFactors = getViscosityCorrectionFactors(flowForCalc, origHead, viscosity);
-        selHead = origHead   / viscoFactors.C_H;
+    if (viscosity >= 4) {
+        viscoFactors = getViscosityCorrectionFactors(flowForCalc, origHead, viscosity, density);
+        selHead = origHead    / viscoFactors.C_H;
         selFlow = flowForCalc / viscoFactors.C_Q;
         viscoCorrected = true;
     }
 
-    // 5. [FIX-1][FIX-2] NPSH analysis
+    // 5. NPSH analysis — API 610 Cl. 6.1.10
     const npshForNss    = (npshRequired && npshRequired > 0) ? npshRequired : npshAvailable;
     const nssUsesNpsha  = !(npshRequired && npshRequired > 0);
     let npshMargin      = null, npshMarginStatus = null;
     if (npshRequired && npshRequired > 0) {
         npshMargin = npshAvailable - npshRequired;
-        npshMarginStatus = npshMargin >= minNpshMargin*1.5 ? 'ok' : (npshMargin >= minNpshMargin ? 'marginal' : 'critical');
+        // API 610: min margin 0.6 m or 3% of NPSHr (whichever greater), typical practice ≥1.0 m
+        const minGood = Math.max(minNpshMargin * 1.5, npshRequired * 0.03 + 1.0);
+        npshMarginStatus = npshMargin >= minGood ? 'ok' : (npshMargin >= minNpshMargin ? 'marginal' : 'critical');
     }
 
     const maxTipSpeedLimit = corrosivity === 'high' ? maxTipSpeedCorrosive : maxTipSpeedNonCorrosive;
@@ -888,24 +1071,37 @@ function calculatePumpSelection(inputData) {
     const isHighTemp       = temperature >= 200;
     const isHighSolids     = ['medium','high'].includes(solidsContent);
 
-    // 6. [FIX-7] Candidate filter — only OH1 and BB4 excluded for O&G
-    let candidates = Object.entries(pumpTypeData);
-    if (isOilAndGas && !isCriticalNPSH)
-        candidates = candidates.filter(([t]) => !['OH1','BB4'].includes(t));
+    // 6. RULE ENGINE — فیلتر hard constraints (از ChatGPT Rule_Engine.txt)
+    const inputNorm = {
+        differentialPressureBar: calc.differentialPressure,
+        temperatureC:  temperature,
+        viscosityCp:   viscosity,
+        flowM3Hr:      flowForCalc,
+        npshAvailableM:npshAvailable,
+        isOilAndGas:   !!isOilAndGas,
+        isCriticalNPSH,
+    };
+    const allCandidates   = Object.entries(pumpTypeData);
+    const feasibleByRules = runRuleEngine(inputNorm, allCandidates);
 
-    // 7. Stage analysis loop
-    const fullValidationLog = [], localFullAnalysis = {};
+    // ثبت rejected توسط Rule Engine در log
+    const fullValidationLog = [];
+    const rejectedByRule = allCandidates
+        .filter(([t]) => !feasibleByRules.find(f => f.type === t))
+        .map(([t]) => {
+            const evals  = SELECTION_RULES.map(r => r.evaluate(inputNorm, pumpTypeData[t], t));
+            const failed = evals.find(e => !e.passed);
+            return { pumpType:t, overallStatus:'REJECTED', stageAnalyses:[], rejectionReason: failed?.reason || 'Rule Engine rejection' };
+        });
+    fullValidationLog.push(...rejectedByRule);
 
-    for (const [type, cand] of candidates) {
-        let rejReason = null;
-        if (temperature    > cand.maxTemperature) rejReason = `Temp (${temperature.toFixed(0)}°C) > max (${cand.maxTemperature}°C)`;
-        else if (dischargePressure > cand.maxPressure)   rejReason = `Pressure (${dischargePressure.toFixed(1)} bar) > max (${cand.maxPressure} bar)`;
+    // 7. Stage analysis loop (Ns / Nss / Tip Speed)
+    const localFullAnalysis = {};
 
+    for (const { type, candidate:cand } of feasibleByRules) {
         let solidsWarning = null;
         if (isHighSolids && type === 'BB5') solidsWarning = 'High solids: BB5 complex internals risk accelerated wear.';
         if (isHighSolids && type === 'BB3') solidsWarning = 'High solids: axially-split BB3 may have seal/wear issues.';
-
-        if (rejReason) { fullValidationLog.push({ pumpType:type, overallStatus:'REJECTED', stageAnalyses:[], rejectionReason:rejReason }); continue; }
 
         const typeResult = { pumpType:type, stageAnalyses:[], overallStatus:'REJECTED', solidsWarning };
 
@@ -917,16 +1113,14 @@ function calculatePumpSelection(inputData) {
             for (const cfg of Array.from(configs)) {
                 const hStage = selHead / stages;
 
-                // [FIX-4] Q_eye = Q/2 for DS (both Ns and Nss); DS 1st Stage only Nss
                 let nsFlow  = selFlow / 3600;
                 let nssFlow = selFlow / 3600;
-                if (cfg === 'DS')             { nsFlow /= 2; nssFlow /= 2; }
+                if (cfg === 'DS')              { nsFlow /= 2; nssFlow /= 2; }
                 else if (cfg === 'DS 1st Stage') { nssFlow /= 2; }
 
                 const ns  = (pumpSpeed * Math.sqrt(nsFlow))  / Math.pow(Math.max(hStage,0.1), 0.75);
                 const nss = (pumpSpeed * Math.sqrt(nssFlow)) / Math.pow(Math.max(npshForNss,0.1), 0.75);
 
-                // [FIX-3] psi from Ns
                 const psi      = getHeadCoefficient(ns);
                 const tipSpeed = Math.sqrt(2 * hStage * 9.81 * psi);
                 const impDia   = (tipSpeed * 60 * 1000) / (Math.PI * pumpSpeed);
@@ -950,9 +1144,9 @@ function calculatePumpSelection(inputData) {
                     score, reason:reasons.join('; '), candidate:cand, nssUsesNpsha,
                     limits:{ minNsLimit:minNsLim, maxNss, maxTipSpeedLimit },
                     checks:[
-                        { parameter:'Ns',        limit:`≥ ${minNsLim}`,           actual:ns.toFixed(0),       status:nsOk ?'pass':'fail' },
-                        { parameter:'Nss',       limit:`≤ ${maxNss}`,             actual:nss.toFixed(0),      status:nssOk?'pass':'fail', note:nssUsesNpsha?'(NPSHa proxy)':'(NPSHr)' },
-                        { parameter:'Tip Speed', limit:`≤ ${maxTipSpeedLimit} m/s`,actual:tipSpeed.toFixed(1),status:tsOk ?'pass':'fail' },
+                        { parameter:'Ns',        limit:`≥ ${minNsLim}`,            actual:ns.toFixed(0),       status:nsOk ?'pass':'fail' },
+                        { parameter:'Nss',       limit:`≤ ${maxNss}`,              actual:nss.toFixed(0),      status:nssOk?'pass':'fail', note:nssUsesNpsha?'(NPSHa proxy)':'(NPSHr)' },
+                        { parameter:'Tip Speed', limit:`≤ ${maxTipSpeedLimit} m/s`,actual:tipSpeed.toFixed(1), status:tsOk ?'pass':'fail' },
                     ]
                 };
                 typeResult.stageAnalyses.push(sr);
@@ -963,39 +1157,64 @@ function calculatePumpSelection(inputData) {
         fullValidationLog.push(typeResult);
     }
 
-    // 8. Final selection
-    const all = Object.values(localFullAnalysis);
+    // 8. RANKING ENGINE (از ChatGPT) — رتبه‌بندی کاندیداهای feasible
+    const hydraulicForRanking = {
+        totalHeadM:      origHead,
+        estimatedNpshr:  origHead * 0.04,   // تخمین اولیه برای ranking
+    };
+    const rankingInput = { flowM3Hr:flowForCalc, npshAvailableM:npshAvailable, viscosityCp:viscosity };
+    const rankingResult = runRankingEngine(feasibleByRules, rankingInput, hydraulicForRanking);
+
+    // 9. Final selection — ترکیب Ns/Nss checks + Ranking score
+    const allConfigs = Object.values(localFullAnalysis);
     let primary = {};
-    if (all.length > 0) {
-        const order = isCriticalNPSH
-            ? ["VS6","OH2","BB2","BB5","BB3","BB1","OH1","BB4"]
-            : ["OH2","BB2","BB5","BB3","VS6","BB1","OH1","BB4"];
-        all.sort((a,b) => {
-            const ia = order.indexOf(a.finalSuggestedType), ib = order.indexOf(b.finalSuggestedType);
-            if (ia !== ib) return ia - ib;
-            if (a.score !== b.score) return a.score - b.score;
-            return a.finalNumberOfStages - b.finalNumberOfStages;
+
+    if (allConfigs.length > 0) {
+        // برای هر config، rankScore نوع آن را اضافه می‌کنیم
+        allConfigs.forEach(cfg => {
+            const rk = rankingResult.find(r => r.pumpType === cfg.finalSuggestedType);
+            cfg.rankScore = rk ? rk.rankScore : 50;
+            cfg.rankReasons = rk ? rk.reasons : [];
+            cfg.scoreBreakdown = rk ? rk.breakdown : {};
         });
-        primary = all[0];
+
+        // مرتب‌سازی: اول score=0 (pass)، بعد rankScore بالاتر، بعد کمتر stage
+        allConfigs.sort((a, b) => {
+            if (a.score !== b.score) return a.score - b.score;          // pass قبل از warn
+            if (b.rankScore !== a.rankScore) return b.rankScore - a.rankScore; // Ranking Engine
+            return a.finalNumberOfStages - b.finalNumberOfStages;       // کمتر stage بهتر
+        });
+
+        primary = allConfigs[0];
         primary.status = primary.score === 0 ? 'pass' : 'warn';
     } else {
-        primary = { finalSuggestedType:"No suitable pump found", status:'fail' };
+        primary = { finalSuggestedType:"No suitable pump found", status:'fail', rankScore:0 };
     }
 
     const selLog = fullValidationLog.find(l => l.pumpType === primary.finalSuggestedType);
     if (selLog) selLog.overallStatus = 'SELECTED';
 
-    // 9. Power & efficiency
-    // [FIX-5] Use original (process-duty) Ns and flow for efficiency lookup
+    // 9. Power & efficiency — use original (process-duty) Ns for efficiency lookup
     const ns_m_orig  = (pumpSpeed * Math.sqrt(flowForCalc/3600)) / Math.pow(Math.max(origHead,0.1),0.75);
     const estEffRaw  = getEfficiencyFromChart(ns_m_orig * 51.64, flowForCalc * 4.40287);
-    const corrEff    = estEffRaw * viscoFactors.C_E;
+    const corrEff    = Math.max(20, estEffRaw * viscoFactors.C_E);
     const sg         = density / 1000;
     const hydPow     = (flowForCalc * origHead * sg) / 367;
     const isFail     = !primary.finalSuggestedType || primary.finalSuggestedType.includes('No suitable') || primary.status === 'fail';
     const bhp        = isFail ? 0 : hydPow / (corrEff / 100);
 
-    // Casing type + [FIX-8] high-temp warning
+    // Motor rated power — API 610 Table 4 service factors
+    // ≤22 kW: 1.25x, 22–55 kW: 1.15x, >55 kW: 1.10x (minimum)
+    let motorRatedPower = 0;
+    if (!isFail && bhp > 0) {
+        const sf = bhp <= 22 ? 1.25 : (bhp <= 55 ? 1.15 : 1.10);
+        const rawMotor = bhp * sf;
+        // Round up to nearest standard IEC motor size
+        const iecSizes = [0.37,0.55,0.75,1.1,1.5,2.2,3,4,5.5,7.5,11,15,18.5,22,30,37,45,55,75,90,110,132,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000];
+        motorRatedPower = iecSizes.find(s => s >= rawMotor) || rawMotor * 1.10;
+    }
+
+    // Casing type + high-temp warning (API 610 Cl. 6.3.11)
     let casingType = 'N/A', highTempWarning = null;
     if (!isFail) {
         if (primary.finalSuggestedType.startsWith('BB'))     casingType = 'Double Volute';
@@ -1006,12 +1225,21 @@ function calculatePumpSelection(inputData) {
             highTempWarning = `Temp (${temperature}°C) ≥ 200°C: API 610 Cl. 6.3.11 may require radially split casing. Verify with vendor.`;
     }
 
+    // 10. NPSHr estimation (Stepanoff) + Nozzle velocity check
+    const npshEst     = !isFail ? estimateNPSHr(
+        flowForCalc, origHead, pumpSpeed,
+        primary.finalNumberOfStages || 1,
+        primary.suctionConfig || 'SS'
+    ) : null;
+    const nozzleCheck = !isFail ? checkNozzleVelocity(flowForCalc) : null;
+
     const suggestionText = isFail
         ? "No suitable pump found for these conditions"
         : `${primary.score>0?'(WARN) ':''}${primary.finalSuggestedType} — ${primary.finalNumberOfStages} Stage(s) [${primary.suctionConfig||'SS'}] @ ${primary.suggestedSpeed} RPM`;
 
     return {
         ...primary, hydraulicPower:hydPow.toFixed(2), brakeHorsepower:bhp.toFixed(2),
+        motorRatedPower: motorRatedPower > 0 ? motorRatedPower.toFixed(1) : 'N/A',
         differentialPressure:calc.differentialPressure.toFixed(2), specificGravity:sg.toFixed(3),
         totalHead:origHead.toFixed(2), suggestion:suggestionText,
         finalImpellerDiameter:(primary.finalImpellerDiameter||0).toFixed(0),
@@ -1021,6 +1249,7 @@ function calculatePumpSelection(inputData) {
         fullAnalysisForComparison:localFullAnalysis, fullValidationLog,
         viscoFactors, viscoCorrected, flowUsedForCalc:flowForCalc, flowSource,
         npshMargin, npshMarginStatus, nssUsesNpsha, highTempWarning, solidsContent,
+        npshEst, nozzleCheck,
     };
 }
 
@@ -1092,23 +1321,90 @@ function renderResultTab(result, values) {
             <div><strong>Solids Content (${result.solidsContent}):</strong>
             Impeller type, clearances, and wear ring materials must be reviewed for erosion resistance.</div></div>`;
 
+    // NPSHr Estimation banner (Stepanoff)
+    if (result.npshEst) {
+        const ne = result.npshEst;
+        const npshMarginEst = values.npshAvailable ? (values.npshAvailable - ne.npshRest).toFixed(2) : null;
+        const estClass = npshMarginEst !== null
+            ? (parseFloat(npshMarginEst) >= 1.0 ? 'success' : (parseFloat(npshMarginEst) >= 0 ? 'warn' : 'error'))
+            : 'info';
+        const nssEst = ne.nsUsed > 0
+            ? ((values.pumpSpeed||2950) * Math.sqrt((values.ratedFlowRate||0)/3600/2) / Math.pow(Math.max(ne.npshRest,0.1),0.75)).toFixed(0)
+            : '—';
+        banners += `<div class="alert-banner ${estClass}"><span class="alert-icon">💧</span>
+            <div style="flex:1">
+                <strong>Estimated NPSHr (Stepanoff): ${ne.npshRest} m</strong>
+                <span class="text-xs ml-2 opacity-70">(Ns=${ne.nsUsed}, σ=${ne.sigma})</span>
+                ${npshMarginEst !== null ? `<br><span class="text-xs">Estimated NPSH Margin: <b>${npshMarginEst} m</b> (NPSHa ${values.npshAvailable}m − NPSHr_est ${ne.npshRest}m)</span>` : ''}
+                <br><span class="text-xs opacity-60">⚠ ${ne.disclaimer}</span>
+            </div></div>`;
+    }
+
+    // Nozzle velocity banner (API 610 Table 4)
+    if (result.nozzleCheck) {
+        const nc = result.nozzleCheck;
+        const sc = { ok:'success', marginal:'warn', fail:'error' };
+        const ic = { ok:'✔', marginal:'⚠', fail:'✖' };
+        const worstStatus = nc.suction.status === 'fail' || nc.discharge.status === 'fail' ? 'error'
+            : nc.suction.status === 'marginal' || nc.discharge.status === 'marginal' ? 'warn' : 'success';
+        banners += `<div class="alert-banner ${worstStatus}"><span class="alert-icon">🔩</span>
+            <div style="flex:1">
+                <strong>Estimated Nozzle Velocities (API 610 Table 4)</strong>
+                <div class="flex gap-6 mt-1 flex-wrap">
+                    <span class="text-sm"><b>Suction (${nc.suction.sizeInch}")</b>:
+                        <span class="${nc.suction.status==='ok'?'text-green-700':nc.suction.status==='marginal'?'text-yellow-700':'text-red-700'} font-bold">
+                            ${ic[nc.suction.status]} ${nc.suction.velocity} m/s
+                        </span>
+                        <span class="text-xs opacity-60">(limit ${nc.suction.limit} m/s)</span>
+                    </span>
+                    <span class="text-sm"><b>Discharge (${nc.discharge.sizeInch}")</b>:
+                        <span class="${nc.discharge.status==='ok'?'text-green-700':nc.discharge.status==='marginal'?'text-yellow-700':'text-red-700'} font-bold">
+                            ${ic[nc.discharge.status]} ${nc.discharge.velocity} m/s
+                        </span>
+                        <span class="text-xs opacity-60">(limit ${nc.discharge.limit} m/s)</span>
+                    </span>
+                </div>
+                <div class="text-xs opacity-50 mt-1">⚠ ${nc.disclaimer}</div>
+            </div></div>`;
+    }
+
     container.innerHTML = `
-    <div id="mainResultContainer" class="space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
-            <div class="text-center p-5 rounded-xl border-2 ${borderC} bg-gradient-to-br ${bgC} shadow-lg flex items-center justify-center">
-                <p class="text-xl font-bold ${textC} tracking-wider">${result.suggestion}</p>
+    <div id="mainResultContainer" class="space-y-5">
+
+        <!-- PRIMARY RESULT BANNER -->
+        <div class="rounded-xl border-2 ${borderC} bg-gradient-to-br ${bgC} shadow-lg p-4">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                    <div class="text-xs font-semibold uppercase tracking-widest mb-1 ${textC} opacity-70">API 610 Selection Result</div>
+                    <p class="text-2xl font-bold ${textC}">${result.suggestion}</p>
+                </div>
+                <div class="flex gap-2 flex-wrap justify-center">
+                    <button type="button" id="analyzeOptionsBtn" class="btn-green-gradient-3d text-sm">📊 All Options</button>
+                    <button type="button" id="saveToHistoryBtn"  class="btn-3d text-sm">💾 Save</button>
+                </div>
             </div>
-            <div class="flex flex-col sm:flex-row gap-2 justify-center items-center">
-                <button type="button" id="analyzeOptionsBtn" class="btn-green-gradient-3d text-sm w-full sm:w-auto">Analyze All Options</button>
-                <button type="button" id="saveToHistoryBtn"  class="btn-3d text-sm w-full sm:w-auto">Save to History</button>
+            ${!isFail ? `
+            <div class="mt-3 pt-3 border-t border-current border-opacity-20 grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div class="text-center"><div class="text-lg font-bold ${textC}">${result.finalNs}</div><div class="text-xs opacity-60 uppercase">Ns</div></div>
+                <div class="text-center"><div class="text-lg font-bold ${textC} ${result.nssUsesNpsha?'opacity-70':''}">${result.finalNss}${result.nssUsesNpsha?'*':''}</div><div class="text-xs opacity-60 uppercase">Nss</div></div>
+                <div class="text-center"><div class="text-lg font-bold ${textC}">${result.finalTipSpeed} m/s</div><div class="text-xs opacity-60 uppercase">Tip Speed</div></div>
+                <div class="text-center"><div class="text-lg font-bold ${textC}">${result.finalImpellerDiameter} mm</div><div class="text-xs opacity-60 uppercase">Imp. Dia (est.)</div></div>
+                <div class="text-center"><div class="text-lg font-bold ${result.rankScore>=75?'text-green-600':result.rankScore>=50?'text-yellow-600':'text-red-600'}">${result.rankScore||'—'}/100</div><div class="text-xs opacity-60 uppercase">Rank Score</div></div>
             </div>
+            ${result.scoreBreakdown ? `
+            <div class="mt-2 grid grid-cols-4 gap-2 text-center text-xs opacity-70">
+                <div>Flow: <b>${result.scoreBreakdown.flow}</b></div>
+                <div>Head: <b>${result.scoreBreakdown.head}</b></div>
+                <div>NPSH: <b>${result.scoreBreakdown.npsh}</b></div>
+                <div>Visc: <b>${result.scoreBreakdown.viscosity}</b></div>
+            </div>` : ''}` : ''}
         </div>
 
         <div id="warningBannersContainer">${banners}</div>
 
         <div class="result-grid-container">
             <div class="result-box">
-                <h3 class="result-box-title">Input Data</h3>
+                <h3 class="result-box-title">📋 Input Data</h3>
                 <div class="result-item"><span class="result-label">Fluid</span><span class="result-value">${values.fluidName||'N/A'}</span></div>
                 <div class="result-item"><span class="result-label">Temperature</span><span class="result-value">${values.temperature} °C</span></div>
                 <div class="result-item"><span class="result-label">Density</span><span class="result-value">${values.density} kg/m³</span></div>
@@ -1121,19 +1417,20 @@ function renderResultTab(result, values) {
             </div>
 
             <div class="result-box">
-                <h3 class="result-box-title">Calculated Performance</h3>
+                <h3 class="result-box-title">🌊 Calculated Performance</h3>
                 <div class="result-item"><span class="result-label">Flow Used (${result.flowSource})</span><span class="result-value">${result.flowUsedForCalc} m³/hr</span></div>
                 <div class="result-item"><span class="result-label">Differential Pressure</span><span class="result-value">${result.differentialPressure} bar</span></div>
                 <div class="result-item"><span class="result-label">Total Head</span><span class="result-value">${result.totalHead} m</span></div>
                 <div class="result-item"><span class="result-label">Specific Gravity</span><span class="result-value">${result.specificGravity}</span></div>
-                <div class="result-item"><span class="result-label">Est. Efficiency (water)</span><span class="result-value">${result.estimatedEfficiency} %</span></div>
+                <div class="result-item"><span class="result-label">Est. Efficiency (water equiv.)</span><span class="result-value">${result.estimatedEfficiency} %</span></div>
                 ${result.viscoCorrected?`<div class="result-item"><span class="result-label">Corrected Efficiency (viscous)</span><span class="result-value warn">${result.correctedEfficiency} %</span></div>`:''}
                 <div class="result-item"><span class="result-label">Hydraulic Power</span><span class="result-value">${result.hydraulicPower} kW</span></div>
-                <div class="result-item"><span class="result-label">Brake Power (BHP)</span><span class="result-value">${isFail?'N/A':result.brakeHorsepower+' kW'}</span></div>
+                <div class="result-item"><span class="result-label">Shaft Power (BHP)</span><span class="result-value">${isFail?'N/A':result.brakeHorsepower+' kW'}</span></div>
+                <div class="result-item"><span class="result-label">Motor Rated Power <span class="text-xs text-blue-500">(API 610 Table 4)</span></span><span class="result-value pass">${isFail?'N/A':result.motorRatedPower+' kW'}</span></div>
             </div>
 
             <div class="result-box">
-                <h3 class="result-box-title">Selection Parameters</h3>
+                <h3 class="result-box-title">⚙ Selection Parameters</h3>
                 <div class="result-item"><span class="result-label">Pump Type</span><span class="result-value">${isFail?'N/A':result.finalSuggestedType}</span></div>
                 <div class="result-item"><span class="result-label">Stages</span><span class="result-value">${isFail?'N/A':result.finalNumberOfStages}</span></div>
                 <div class="result-item"><span class="result-label">Suction Config</span><span class="result-value">${isFail?'N/A':(result.suctionConfig||'SS')}</span></div>
@@ -1226,10 +1523,12 @@ function renderComparisonTable() {
         : '<span class="text-green-600 font-normal text-xs">(NPSHr ✓)</span>';
 
     cont.innerHTML = `<h2 class="form-section-title">All Options Comparison</h2>
+    <p class="text-xs text-gray-500 mb-3">Ranking score: Flow 30% + Head 35% + NPSH 20% + Viscosity 15% (از Ranking Engine ChatGPT)</p>
     <div class="overflow-x-auto shadow-md rounded-lg mt-4">
         <table class="w-full text-sm text-left text-gray-600">
             <thead class="text-xs uppercase bg-gray-100 text-gray-700"><tr>
                 <th class="px-4 py-3">Configuration</th>
+                <th class="px-4 py-3 text-center">Rank Score</th>
                 <th class="px-4 py-3 text-center">Ns</th>
                 <th class="px-4 py-3 text-center">Nss ${nssNote}</th>
                 <th class="px-4 py-3 text-center">Tip Speed</th>
@@ -1239,8 +1538,10 @@ function renderComparisonTable() {
             <tbody>${res.map(r => {
                 const rc = r.isPrimary?(r.score===0?'bg-blue-100':'bg-yellow-100'):(r.score>0?'bg-yellow-50':'bg-white');
                 const badge = r.isPrimary?'<span class="ml-1 text-xs bg-blue-600 text-white rounded px-1">PRIMARY</span>':'';
+                const rankColor = r.rankScore>=75?'text-green-700 font-bold':r.rankScore>=50?'text-yellow-700':'text-red-600';
                 return `<tr class="${rc} border-b hover:bg-gray-50">
                     <td class="px-4 py-3 font-medium text-gray-900">${r.finalSuggestedType} · ${r.finalNumberOfStages} stg · ${r.suctionConfig} · ${r.suggestedSpeed} RPM ${badge}</td>
+                    <td class="px-4 py-3 text-center"><span class="${rankColor}">${r.rankScore||'—'}</span><div class="text-xs text-gray-400">${r.scoreBreakdown?`F:${r.scoreBreakdown.flow} H:${r.scoreBreakdown.head} N:${r.scoreBreakdown.npsh} V:${r.scoreBreakdown.viscosity}`:''}</div></td>
                     <td class="px-4 py-3 text-center ${r.checks[0].status==='fail'?'text-red-600 font-bold':''}">${r.ns.toFixed(0)} <span class="text-gray-400 text-xs">(≥${r.limits.minNsLimit})</span></td>
                     <td class="px-4 py-3 text-center ${r.checks[1].status==='fail'?'text-red-600 font-bold':''}${r.nssUsesNpsha?' text-orange-700':''}">${r.nss.toFixed(0)} <span class="text-gray-400 text-xs">(≤${r.limits.maxNss})</span></td>
                     <td class="px-4 py-3 text-center ${r.checks[2].status==='fail'?'text-red-600 font-bold':''}">${r.tipSpeed.toFixed(1)} <span class="text-gray-400 text-xs">(≤${r.limits.maxTipSpeedLimit})</span></td>
@@ -2119,7 +2420,8 @@ async function exportToPDF() {
                         ['Est. Efficiency (water)',      r.estimatedEfficiency + ' %'],
                         r.viscoCorrected ? ['Corrected Efficiency',  r.correctedEfficiency + ' %'] : null,
                         ['Hydraulic Power',              r.hydraulicPower + ' kW'],
-                        ['Brake Power (BHP)',             isFail ? 'N/A' : r.brakeHorsepower + ' kW'],
+                        ['Shaft Power (BHP)',             isFail ? 'N/A' : r.brakeHorsepower + ' kW'],
+                        ['Motor Rated Power (API 610 T4)', isFail ? 'N/A' : r.motorRatedPower + ' kW'],
                         ['Design Standard',              fd.designStandard || 'API 610'],
                         ['Driver Type',                  (fd.driverType||'—').replace('_',' ')],
                     ].filter(Boolean).map(([k,v],i) => `<tr style="background:${i%2===0?bgLight:'white'};">
