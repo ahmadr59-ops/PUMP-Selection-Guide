@@ -166,12 +166,190 @@
 
         /* ========== NOTIFICATION ========== */
         #validationErrorArea { transition: all 0.3s; }
+
+        /* ========== CRITICAL TAB FIXES ========== */
+        .hidden { display: none !important; }
+        .tab-content { display: none; }
+        .tab-content.active-tab { display: block; }
+
+        /* ========== PROFESSIONAL REDESIGN ========== */
+
+        /* Layout */
+        body { font-family: 'Inter', 'Roboto', sans-serif; background: #0f172a; min-height: 100vh; }
+        #mainContent { max-width: 1400px; }
+
+        /* Header */
+        .header-bar {
+            background: linear-gradient(135deg, #0f2460 0%, #1e3a8a 60%, #1e40af 100%);
+            padding: 1rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+            border-radius: 0.75rem 0.75rem 0 0;
+            box-shadow: 0 4px 24px rgba(15,36,96,0.5);
+            border-bottom: 2px solid #f59e0b;
+        }
+        .app-wrapper {
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            min-height: 100vh;
+        }
+
+        /* Tab nav */
+        .tab-nav {
+            background: #1e293b;
+            padding: 0 1rem;
+            display: flex; flex-wrap: wrap; gap: 2px;
+            border-bottom: 2px solid #334155;
+        }
+        .tab-btn {
+            padding: 0.75rem 1.1rem;
+            font-size: 0.78rem; font-weight: 600;
+            color: #94a3b8;
+            border: none; background: transparent;
+            cursor: pointer; letter-spacing: 0.03em;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.15s; white-space: nowrap;
+        }
+        .tab-btn:hover { color: #e2e8f0; background: rgba(255,255,255,0.05); }
+        .tab-btn.active { color: #f59e0b; border-bottom-color: #f59e0b; background: rgba(245,158,11,0.08); }
+
+        /* Content area */
+        .tab-panel { padding: 1.5rem 2rem; background: #f8fafc; }
+
+        /* Section cards */
+        .section-panel {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+            margin-bottom: 1.25rem;
+        }
+        .section-panel:hover { box-shadow: 0 4px 16px rgba(15,36,96,0.1); transition: box-shadow 0.2s; }
+
+        /* Section heading with number badge */
+        .section-heading {
+            display: flex; align-items: center; gap: 0.75rem;
+            margin-bottom: 1.25rem; padding-bottom: 0.75rem;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        .section-num {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: #1e3a8a; color: white;
+            font-size: 0.75rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .section-title {
+            font-size: 0.95rem; font-weight: 700;
+            color: #1e293b; letter-spacing: -0.01em;
+        }
+        .section-subtitle {
+            font-size: 0.75rem; color: #94a3b8; margin-left: auto;
+        }
+
+        /* Form fields */
+        .field-group { margin-bottom: 0; }
+        .field-label {
+            display: block; font-size: 0.72rem; font-weight: 600;
+            color: #64748b; text-transform: uppercase; letter-spacing: 0.06em;
+            margin-bottom: 0.3rem;
+        }
+        .field-label .req { color: #ef4444; margin-left: 2px; }
+        .field-input, .field-select {
+            width: 100%; padding: 0.5rem 0.7rem;
+            font-size: 0.85rem; font-weight: 500; color: #1e293b;
+            background: #f8fafc; border: 1.5px solid #e2e8f0;
+            border-radius: 0.4rem; outline: none;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .field-input:focus, .field-select:focus {
+            border-color: #3b82f6; background: white;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+        .field-input::placeholder { color: #cbd5e1; font-weight: 400; }
+        .field-input.computed {
+            background: #f1f5f9; color: #64748b;
+            border-style: dashed; cursor: default;
+        }
+        .field-input.user-filled { color: #1d4ed8; }
+        .field-input.auto-filled { color: #059669; font-style: italic; }
+
+        /* Divider label */
+        .field-divider {
+            font-size: 0.68rem; font-weight: 700; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            padding: 0.5rem 0 0.25rem; border-top: 1px solid #f1f5f9;
+            margin-top: 0.5rem; grid-column: 1 / -1;
+        }
+
+        /* Action bar */
+        .action-bar {
+            background: white; border-top: 1px solid #e2e8f0;
+            padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 0.75rem;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: white; border: none; border-radius: 0.5rem;
+            font-weight: 700; font-size: 0.875rem;
+            padding: 0.65rem 1.75rem; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+            transition: all 0.15s; letter-spacing: 0.01em;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,99,235,0.45); }
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-run {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white; border: none; border-radius: 0.5rem;
+            font-weight: 700; font-size: 1rem; letter-spacing: 0.01em;
+            padding: 0.8rem 2.5rem; cursor: pointer;
+            box-shadow: 0 6px 20px rgba(16,185,129,0.4);
+            transition: all 0.15s;
+        }
+        .btn-run:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16,185,129,0.5); }
+        .btn-run:active { transform: translateY(0); }
+
+        .btn-sm {
+            padding: 0.4rem 0.9rem; font-size: 0.75rem; font-weight: 600;
+            border-radius: 0.375rem; border: 1px solid #e2e8f0;
+            background: white; color: #475569; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-sm:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .btn-sm.danger { color: #dc2626; border-color: #fecaca; }
+        .btn-sm.danger:hover { background: #fef2f2; }
+        .btn-sm.purple { color: #7c3aed; border-color: #ddd6fe; }
+        .btn-sm.purple:hover { background: #f5f3ff; }
+
+        /* Checkbox */
+        .checkbox-field { display: flex; align-items: center; gap: 0.5rem; }
+        .checkbox-field input[type=checkbox] { width: 16px; height: 16px; accent-color: #1d4ed8; }
+        .checkbox-label { font-size: 0.8rem; font-weight: 500; color: #374151; }
+        .checkbox-hint { font-size: 0.68rem; color: #94a3b8; }
+
+        /* Result styles (keep existing, update colors) */
+        .result-grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; }
+        .result-box { background: white; padding: 1.25rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
+        .result-box-title { font-size: 0.85rem; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.5rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+        .result-item { display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0; font-size: 0.84rem; border-bottom: 1px solid #f8fafc; }
+        .result-item:last-child { border-bottom: none; }
+        .result-label { color: #64748b; font-weight: 500; }
+        .result-value { font-weight: 700; color: #1e293b; text-align: right; }
+        .result-value.warn { color: #d97706; }
+        .result-value.pass { color: #059669; }
+        .result-value.fail { color: #dc2626; }
     </style>
 </head>
-<body class="bg-gray-100">
-
-<div id="mainContent" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-full bg-gray-100">
-    <div class="bg-transparent shadow-none rounded-xl">
+<body>
+<div id="mainContent" class="container mx-auto p-4 max-w-screen-xl">
+<div class="app-wrapper">
 
         <!-- HEADER -->
         <div class="header-bar">
@@ -188,232 +366,282 @@
             </div>
         </div>
 
-        <div class="py-5">
-            <div class="tab-button-container-wrapper">
-                <div class="tab-button-container">
-                    <button id="dataEntryTabButton" data-tab="dataEntryTab" class="tab-button active">Data Entry</button>
-                    <button id="resultTabButton" data-tab="resultTab" class="tab-button">Result</button>
-                    <button id="comparisonTabButton" data-tab="comparisonTab" class="tab-button hidden">All Options</button>
-                    <button id="chartTabButton" data-tab="chartTab" class="tab-button">H-Q Chart</button>
-                    <button id="apiChartTabButton" data-tab="apiChartTab" class="tab-button">API 610 Chart</button>
-                    <button id="calculationSettingsTabButton" data-tab="calculationSettingsTab" class="tab-button">Settings</button>
-                    <button id="referenceLibraryTabButton" data-tab="referenceLibraryTab" class="tab-button">Reference Library</button>
-                    <button id="formulaTabButton" data-tab="formulaTab" class="tab-button">Formulas</button>
-                    <button id="pumpTypesTabButton" data-tab="pumpTypesTab" class="tab-button">Pump Types</button>
-                    <button id="historyTabButton" data-tab="historyTab" class="tab-button">History</button>
-                </div>
-            </div>
-        </div>
+        <nav class="tab-nav">
+            <button id="dataEntryTabButton" data-tab="dataEntryTab" class="tab-btn active">📋 Data Entry</button>
+            <button id="resultTabButton" data-tab="resultTab" class="tab-btn">📊 Result</button>
+            <button id="comparisonTabButton" data-tab="comparisonTab" class="tab-btn hidden">⚖ All Options</button>
+            <button id="chartTabButton" data-tab="chartTab" class="tab-btn">📈 H-Q Chart</button>
+            <button id="apiChartTabButton" data-tab="apiChartTab" class="tab-btn">🗺 API 610 Map</button>
+            <button id="calculationSettingsTabButton" data-tab="calculationSettingsTab" class="tab-btn">⚙ Settings</button>
+            <button id="referenceLibraryTabButton" data-tab="referenceLibraryTab" class="tab-btn">📚 References</button>
+            <button id="formulaTabButton" data-tab="formulaTab" class="tab-btn">∑ Formulas</button>
+            <button id="pumpTypesTabButton" data-tab="pumpTypesTab" class="tab-btn">🔩 Pump Types</button>
+            <button id="historyTabButton" data-tab="historyTab" class="tab-btn">🕐 History</button>
+        </nav>
 
         <div id="validationErrorArea" class="hidden mb-4 p-3 rounded-lg text-sm text-center mx-4"></div>
 
         <!-- ==================== DATA ENTRY TAB ==================== -->
-        <div id="dataEntryTab" class="tab-content pt-2 px-6 pb-6">
+        <div id="dataEntryTab" class="tab-content active-tab tab-panel">
             <form id="pumpForm">
-                <div class="space-y-6">
 
-                    <!-- Project Details -->
-                    <div class="p-6 bg-white border border-gray-300 rounded-xl shadow-md">
-                        <h3 class="form-section-title">Project Details</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
-                            <div>
-                                <label for="projectName" class="form-label">Project Name</label>
-                                <input type="text" id="projectName" name="projectName" class="form-input" placeholder="e.g., Project X">
-                            </div>
-                            <div>
-                                <label for="pumpName" class="form-label">Pump Tag</label>
-                                <input type="text" id="pumpName" name="pumpName" class="form-input" placeholder="e.g., P-101 A">
-                            </div>
-                            <div>
-                                <label for="service" class="form-label">Service</label>
-                                <input type="text" id="service" name="service" class="form-input" placeholder="e.g., Crude Charge">
-                            </div>
-                            <div>
-                                <label for="designStandard" class="form-label">Design Standard</label>
-                                <select id="designStandard" name="designStandard" class="form-select">
-                                    <option value="API610">API 610</option>
-                                    <option value="ShellDEP">Shell DEP</option>
-                                    <option value="TotalGS">Total GS</option>
-                                    <option value="ARAMCO">ARAMCO</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="manufacturer" class="form-label">Preferred Manufacturer</label>
-                                <input type="text" id="manufacturer" name="manufacturer" class="form-input" placeholder="e.g., KSB, Sulzer">
-                            </div>
-                            <div class="flex items-center mt-6">
-                                <input type="checkbox" id="isOilAndGas" name="isOilAndGas" class="h-4 w-4 text-indigo-600 border-gray-300 rounded" checked>
-                                <label for="isOilAndGas" class="ml-2 block text-sm text-gray-900 font-medium">
-                                    Oil &amp; Gas / Refinery Project
-                                    <span class="block text-xs text-gray-500 font-normal">Excludes OH1 &amp; BB4 from candidates</span>
-                                </label>
-                            </div>
-                        </div>
+                <!-- ── SECTION 1: Project Identification ────────────────── -->
+                <div class="section-panel">
+                    <div class="section-heading">
+                        <span class="section-num">1</span>
+                        <span class="section-title">Project Identification</span>
+                        <span class="section-subtitle">EPC / Owner reference data</span>
                     </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <!-- Fluid Properties -->
-                        <div class="p-6 bg-white border border-gray-300 rounded-xl shadow-md">
-                            <h3 class="form-section-title">Fluid Properties</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="md:col-span-2 relative autocomplete">
-                                    <label for="fluidName" class="form-label">Fluid Name (type to search)</label>
-                                    <input type="text" id="fluidName" name="fluidName" class="form-input" placeholder="e.g., Diesel Oil" autocomplete="off">
-                                    <div id="autocomplete-list" class="autocomplete-items"></div>
-                                </div>
-                                <div>
-                                    <label for="temperature" class="form-label required-label">Temperature (°C)</label>
-                                    <input type="number" id="temperature" name="temperature" class="form-input" placeholder="e.g., 65">
-                                </div>
-                                <div>
-                                    <label for="density" class="form-label required-label">Density (kg/m³)</label>
-                                    <input type="number" id="density" name="density" class="form-input" placeholder="e.g., 840">
-                                </div>
-                                <div>
-                                    <label for="viscosity" class="form-label required-label">Viscosity (cP)</label>
-                                    <input type="number" id="viscosity" name="viscosity" class="form-input" placeholder="e.g., 2.5">
-                                </div>
-                                <div>
-                                    <label for="vaporPressure" class="form-label">Vapor Pressure (bar abs)</label>
-                                    <input type="number" id="vaporPressure" name="vaporPressure" class="form-input" placeholder="e.g., 0.03" step="0.001">
-                                </div>
-                                <div>
-                                    <label for="solidsContent" class="form-label">Solids Content</label>
-                                    <select id="solidsContent" name="solidsContent" class="form-select">
-                                        <option value="none">None / Negligible</option>
-                                        <option value="low">Low (&lt; 50 ppm)</option>
-                                        <option value="medium">Medium (50–500 ppm)</option>
-                                        <option value="high">High / Slurry (&gt; 500 ppm)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="corrosivity" class="form-label">Corrosivity</label>
-                                    <select id="corrosivity" name="corrosivity" class="form-select">
-                                        <option value="low">Low / Non-corrosive</option>
-                                        <option value="medium">Medium</option>
-                                        <option value="high">High / Very corrosive</option>
-                                    </select>
-                                </div>
-                            </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="field-group">
+                            <label class="field-label">Project Name</label>
+                            <input type="text" id="projectName" name="projectName" class="field-input" placeholder="e.g. Isfahan Refinery Ph.3">
                         </div>
-
-                        <!-- Process Conditions -->
-                        <div class="p-6 bg-white border border-gray-300 rounded-xl shadow-md">
-                            <h3 class="form-section-title">Process Conditions</h3>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label for="ratedFlowRate" class="form-label required-label">Rated Flow Rate (m³/hr)</label>
-                                    <input type="number" id="ratedFlowRate" name="ratedFlowRate" class="form-input" placeholder="e.g., 250">
-                                </div>
-                                <div>
-                                    <label for="normalFlowRate" class="form-label">Normal Flow Rate (m³/hr)</label>
-                                    <input type="number" id="normalFlowRate" name="normalFlowRate" class="form-input" placeholder="Optional">
-                                </div>
-                                <div>
-                                    <label for="suctionPressure" class="form-label required-label">Suction Pressure (bar g)</label>
-                                    <input type="number" id="suctionPressure" name="suctionPressure" class="form-input" placeholder="e.g., 1.5">
-                                </div>
-                                <div>
-                                    <label for="dischargePressure" class="form-label required-label">Discharge Pressure (bar g)</label>
-                                    <input type="number" id="dischargePressure" name="dischargePressure" class="form-input" placeholder="e.g., 30">
-                                </div>
-                                <div>
-                                    <label for="npshAvailable" class="form-label required-label">NPSH Available (m)
-                                        <span class="text-xs text-blue-600 font-normal" title="NPSHA at shaft centerline for horizontal pumps, at impeller suction eye for vertical pumps per API 610 Cl. 6.1.10">ⓘ API 610 datum</span>
-                                    </label>
-                                    <input type="number" id="npshAvailable" name="npshAvailable" class="form-input" placeholder="e.g., 6.5">
-                                </div>
-                                <div>
-                                    <label for="npshRequired" class="form-label">NPSH Required / NPSHr (m)
-                                        <span class="text-xs text-orange-600 font-normal" title="Used for Nss calculation (API 610 Annex A). If not given, NPSHa is used as conservative estimate for Nss.">ⓘ For Nss calc</span>
-                                    </label>
-                                    <input type="number" id="npshRequired" name="npshRequired" class="form-input" placeholder="Vendor data (optional)">
-                                </div>
-                                <div>
-                                    <label for="differentialPressure" class="form-label">Differential Pressure (bar)</label>
-                                    <input type="number" id="differentialPressure" name="differentialPressure" class="form-input readonly-calc" readonly placeholder="Auto-calculated">
-                                </div>
-                                <div>
-                                    <label for="totalHead" class="form-label">Total Head (m)</label>
-                                    <input type="number" id="totalHead" name="totalHead" class="form-input readonly-calc" readonly placeholder="Auto-calculated">
-                                </div>
-                            </div>
+                        <div class="field-group">
+                            <label class="field-label">Pump Tag No.</label>
+                            <input type="text" id="pumpName" name="pumpName" class="field-input" placeholder="e.g. P-101 A/B">
                         </div>
-                    </div>
-
-                    <!-- Advanced Details -->
-                    <div class="p-6 bg-white border border-gray-300 rounded-xl shadow-md">
-                        <h3 class="form-section-title">Advanced Details <span class="text-sm font-normal text-gray-500">(Optional)</span></h3>
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                            <div>
-                                <label for="pumpSpeed" class="form-label">Pump Speed (RPM)</label>
-                                <input type="number" id="pumpSpeed" name="pumpSpeed" class="form-input" value="2950">
-                            </div>
-                            <div>
-                                <label for="estimatedEfficiency" class="form-label">Estimated Efficiency (%)</label>
-                                <input type="number" id="estimatedEfficiency" name="estimatedEfficiency" class="form-input readonly-calc" readonly placeholder="Auto-estimated">
-                            </div>
-                            <div>
-                                <label for="driverType" class="form-label">Driver Type</label>
-                                <select id="driverType" name="driverType" class="form-select">
-                                    <option value="electric_motor">Electric Motor</option>
-                                    <option value="steam_turbine">Steam Turbine</option>
-                                    <option value="diesel_engine">Diesel Engine</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="valveStartPosition" class="form-label">Discharge Valve at Start</label>
-                                <select id="valveStartPosition" name="valveStartPosition" class="form-select">
-                                    <option value="closed">Closed (normal practice)</option>
-                                    <option value="open">Open</option>
-                                </select>
-                            </div>
+                        <div class="field-group">
+                            <label class="field-label">Service Description</label>
+                            <input type="text" id="service" name="service" class="field-input" placeholder="e.g. Crude Charge">
                         </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex justify-center pt-4">
-                        <button type="button" id="suggestPumpBtn" class="btn-green-gradient-3d text-base px-8 py-3">
-                            ⚙ Suggest Pump Type (API 610)
-                        </button>
-                    </div>
-
-                    <div class="mt-6 pt-4 border-t border-gray-200 flex justify-between items-center flex-wrap gap-2">
-                        <div class="flex gap-2">
-                            <button type="button" id="resetFormBtn" class="btn-3d btn-small-3d btn-danger-3d">Reset Form</button>
+                        <div class="field-group">
+                            <label class="field-label">Design Standard</label>
+                            <select id="designStandard" name="designStandard" class="field-select">
+                                <option value="API610">API 610 (12th Ed.)</option>
+                                <option value="ShellDEP">Shell DEP</option>
+                                <option value="TotalGS">Total GS</option>
+                                <option value="ARAMCO">Saudi ARAMCO</option>
+                            </select>
                         </div>
-                        <div class="flex space-x-2 flex-wrap gap-2">
-                            <button type="button" id="saveProjectBtn" class="btn-3d btn-small-3d btn-project">💾 Save Project</button>
-                            <button type="button" id="openProjectBtn" class="btn-3d btn-small-3d btn-project">📂 Open Project</button>
-                            <input type="file" id="openProjectFile" class="hidden" accept=".pump_project">
-                            <button type="button" id="downloadSampleExcelBtn" class="btn-3d btn-small-3d">⬇ Download Template</button>
-                            <button type="button" id="importExcelBtn" class="btn-3d btn-small-3d">📥 Import Excel</button>
-                            <button type="button" id="exportPdfBtn" class="btn-3d btn-small-3d" style="background:#991b1b;box-shadow:0 4px 0 #7f1d1d;" title="Export current result as PDF (A4 Landscape)">📄 Export PDF</button>
-                            <input type="file" id="importExcelFile" class="hidden" accept=".xlsx,.xls,.csv">
+                        <div class="field-group">
+                            <label class="field-label">Preferred Manufacturer</label>
+                            <input type="text" id="manufacturer" name="manufacturer" class="field-input" placeholder="e.g. KSB / Sulzer / Flowserve">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Driver Type</label>
+                            <select id="driverType" name="driverType" class="field-select">
+                                <option value="electric_motor">Electric Motor</option>
+                                <option value="steam_turbine">Steam Turbine</option>
+                                <option value="diesel_engine">Diesel Engine</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Discharge Valve at Start</label>
+                            <select id="valveStartPosition" name="valveStartPosition" class="field-select">
+                                <option value="closed">Closed (standard)</option>
+                                <option value="open">Open</option>
+                            </select>
+                        </div>
+                        <div class="field-group flex items-center pt-5">
+                            <div class="checkbox-field">
+                                <input type="checkbox" id="isOilAndGas" name="isOilAndGas" checked>
+                                <div>
+                                    <label for="isOilAndGas" class="checkbox-label">Oil & Gas / Refinery</label>
+                                    <div class="checkbox-hint">Excludes OH1 & BB4 per API 610 Table 3</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- ── SECTION 2: Fluid Properties ──────────────────────── -->
+                <div class="section-panel">
+                    <div class="section-heading">
+                        <span class="section-num">2</span>
+                        <span class="section-title">Fluid Properties</span>
+                        <span class="section-subtitle">At pump suction conditions</span>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="field-group md:col-span-2 relative autocomplete">
+                            <label class="field-label">Fluid Name <span style="font-weight:400;color:#94a3b8;">(type to search database)</span></label>
+                            <input type="text" id="fluidName" name="fluidName" class="field-input" placeholder="e.g. Diesel Oil, Crude Oil (Light)..." autocomplete="off">
+                            <div id="autocomplete-list" class="autocomplete-items"></div>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Solids Content</label>
+                            <select id="solidsContent" name="solidsContent" class="field-select">
+                                <option value="none">None / Negligible</option>
+                                <option value="low">Low (&lt; 50 ppm)</option>
+                                <option value="medium">Medium (50–500 ppm)</option>
+                                <option value="high">High / Slurry (&gt; 500 ppm)</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Corrosivity</label>
+                            <select id="corrosivity" name="corrosivity" class="field-select">
+                                <option value="low">Low / Non-corrosive</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High / Very corrosive</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Temperature<span class="req">*</span> <span style="font-weight:400;color:#94a3b8;">°C</span></label>
+                            <input type="number" id="temperature" name="temperature" class="field-input" placeholder="e.g. 65">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Density<span class="req">*</span> <span style="font-weight:400;color:#94a3b8;">kg/m³</span></label>
+                            <input type="number" id="density" name="density" class="field-input" placeholder="e.g. 840">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Viscosity<span class="req">*</span> <span style="font-weight:400;color:#94a3b8;">cP</span></label>
+                            <input type="number" id="viscosity" name="viscosity" class="field-input" placeholder="e.g. 2.5">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Vapor Pressure <span style="font-weight:400;color:#94a3b8;">bar abs</span></label>
+                            <input type="number" id="vaporPressure" name="vaporPressure" class="field-input" placeholder="e.g. 0.03" step="0.001">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── SECTION 3: Process Conditions ────────────────────── -->
+                <div class="section-panel">
+                    <div class="section-heading">
+                        <span class="section-num">3</span>
+                        <span class="section-title">Process Conditions</span>
+                        <span class="section-subtitle">Rated operating point</span>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-3">
+                        <div class="field-group">
+                            <label class="field-label">Rated Flow<span class="req">*</span> <span style="font-weight:400;color:#94a3b8;">m³/hr</span></label>
+                            <input type="number" id="ratedFlowRate" name="ratedFlowRate" class="field-input" placeholder="e.g. 250">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Normal Flow <span style="font-weight:400;color:#94a3b8;">m³/hr</span></label>
+                            <input type="number" id="normalFlowRate" name="normalFlowRate" class="field-input" placeholder="Optional">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Suction Pressure<span class="req">*</span> <span style="font-weight:400;color:#94a3b8;">bar g</span></label>
+                            <input type="number" id="suctionPressure" name="suctionPressure" class="field-input" placeholder="e.g. 1.5">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Discharge Pressure<span class="req">*</span> <span style="font-weight:400;color:#94a3b8;">bar g</span></label>
+                            <input type="number" id="dischargePressure" name="dischargePressure" class="field-input" placeholder="e.g. 30">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Differential Pressure <span style="font-weight:400;color:#94a3b8;">bar</span></label>
+                            <input type="number" id="differentialPressure" name="differentialPressure" class="field-input computed" readonly placeholder="Auto-calculated">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Total Head <span style="font-weight:400;color:#94a3b8;">m</span></label>
+                            <input type="number" id="totalHead" name="totalHead" class="field-input computed" readonly placeholder="Auto-calculated">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">NPSHa<span class="req">*</span> <span style="font-weight:400;color:#94a3b8;">m</span>
+                                <span title="At shaft centerline — API 610 Cl. 6.1.10" style="color:#3b82f6;cursor:help;font-size:0.75rem;">ⓘ</span>
+                            </label>
+                            <input type="number" id="npshAvailable" name="npshAvailable" class="field-input" placeholder="e.g. 6.5">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">NPSHr <span style="font-weight:400;color:#94a3b8;">m</span>
+                                <span title="Vendor NPSH3 — API 610 Annex A Eq. A.2. If omitted, NPSHa used as proxy." style="color:#f59e0b;cursor:help;font-size:0.75rem;">ⓘ</span>
+                            </label>
+                            <input type="number" id="npshRequired" name="npshRequired" class="field-input" placeholder="Vendor data (optional)">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Pump Speed <span style="font-weight:400;color:#94a3b8;">RPM</span></label>
+                            <input type="number" id="pumpSpeed" name="pumpSpeed" class="field-input" value="2950">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Est. Efficiency <span style="font-weight:400;color:#94a3b8;">%</span></label>
+                            <input type="number" id="estimatedEfficiency" name="estimatedEfficiency" class="field-input computed" readonly placeholder="Auto">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── RUN BUTTON ────────────────────────────────────────── -->
+                <div style="text-align:center;padding:1rem 0 0.5rem;">
+                    <button type="button" id="suggestPumpBtn" class="btn-run">
+                        ⚙ &nbsp;Suggest Pump Type — API 610
+                    </button>
+                </div>
+
+                <!-- ── ACTION BAR ─────────────────────────────────────────── -->
+                <div class="action-bar" style="border-radius:0 0 0.75rem 0.75rem;">
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                        <button type="button" id="resetFormBtn" class="btn-sm danger">↺ Reset</button>
+                    </div>
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                        <button type="button" id="saveProjectBtn" class="btn-sm purple">💾 Save Project</button>
+                        <button type="button" id="openProjectBtn" class="btn-sm purple">📂 Open Project</button>
+                        <input type="file" id="openProjectFile" class="hidden" accept=".pump_project">
+                        <button type="button" id="downloadSampleExcelBtn" class="btn-sm">⬇ Template</button>
+                        <button type="button" id="importExcelBtn" class="btn-sm">📥 Import Excel</button>
+                        <button type="button" id="exportPdfBtn" class="btn-sm" style="color:#991b1b;border-color:#fecaca;">📄 Export PDF</button>
+                        <input type="file" id="importExcelFile" class="hidden" accept=".xlsx,.xls,.csv">
+                    </div>
+                </div>
+
             </form>
         </div>
 
-        <!-- ==================== RESULT TAB ==================== -->
-        <div id="resultTab" class="tab-content hidden"></div>
+                <!-- ==================== RESULT TAB ==================== -->
+        <div id="resultTab" class="tab-content tab-panel"></div>
 
         <!-- ==================== COMPARISON TAB ==================== -->
-        <div id="comparisonTab" class="tab-content hidden"></div>
+        <div id="comparisonTab" class="tab-content tab-panel"></div>
 
         <!-- ==================== CHART TABS ==================== -->
-        <div id="chartTab" class="tab-content hidden">
+        <div id="chartTab" class="tab-content tab-panel">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4">H-Q Performance Curve</h2>
             <canvas id="pumpChart"></canvas>
         </div>
-        <div id="apiChartTab" class="tab-content hidden">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">API 610 Pump Selection Map</h2>
-            <canvas id="api610Chart"></canvas>
+        <div id="apiChartTab" class="tab-content tab-panel">
+            <div style="display:grid;grid-template-columns:1fr 280px;gap:1.25rem;align-items:start;">
+
+                <!-- Chart -->
+                <div class="section-panel" style="padding:1rem;">
+                    <div class="section-heading" style="margin-bottom:0.75rem;">
+                        <span style="font-size:0.85rem;font-weight:700;color:#1e293b;text-transform:uppercase;letter-spacing:0.06em;">API 610 Pump Type Selection Map</span>
+                        <span style="font-size:0.7rem;color:#94a3b8;margin-left:auto;">Logarithmic scale — Q vs H per stage</span>
+                    </div>
+                    <canvas id="api610Chart" style="max-height:520px;"></canvas>
+                </div>
+
+                <!-- Legend + Info panel -->
+                <div style="display:flex;flex-direction:column;gap:1rem;">
+
+                    <!-- Operating Point Summary -->
+                    <div class="section-panel" id="apiChartSummary" style="padding:1rem;">
+                        <div style="font-size:0.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">Operating Point</div>
+                        <div id="apiChartOpPoint" style="font-size:0.8rem;color:#64748b;">
+                            Run a calculation first to plot the operating point on the map.
+                        </div>
+                    </div>
+
+                    <!-- Zone legend -->
+                    <div class="section-panel" style="padding:1rem;">
+                        <div style="font-size:0.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">Pump Type Zones</div>
+                        <div id="apiZoneLegend" style="display:flex;flex-direction:column;gap:0.5rem;font-size:0.78rem;"></div>
+                    </div>
+
+                    <!-- API 610 reference zones table -->
+                    <div class="section-panel" style="padding:1rem;">
+                        <div style="font-size:0.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">Typical Ranges — API 610</div>
+                        <table style="width:100%;border-collapse:collapse;font-size:0.72rem;">
+                            <thead>
+                                <tr style="background:#f8fafc;">
+                                    <th style="padding:4px 6px;text-align:left;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;">Type</th>
+                                    <th style="padding:4px 6px;text-align:center;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;">Q (m³/hr)</th>
+                                    <th style="padding:4px 6px;text-align:center;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;">H (m)</th>
+                                    <th style="padding:4px 6px;text-align:center;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;">Max P</th>
+                                </tr>
+                            </thead>
+                            <tbody id="apiZoneTable"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Note -->
+                    <div style="font-size:0.68rem;color:#94a3b8;line-height:1.5;padding:0 0.25rem;">
+                        ⚠ Zones are indicative ranges. Final selection depends on T, P, NPSH, viscosity and Ns/Nss checks.<br>
+                        Ref: API 610 12th Ed. (2021) Table 3.
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- ==================== CALCULATION SETTINGS TAB ==================== -->
-        <div id="calculationSettingsTab" class="tab-content hidden">
+        <div id="calculationSettingsTab" class="tab-content tab-panel">
             <div class="flex justify-between items-center mb-2">
                 <h2 class="form-section-title mb-0 border-b-0">Calculation Settings</h2>
                 <button id="resetSettingsBtn" class="btn-3d btn-small-3d btn-danger-3d">Reset to Defaults</button>
@@ -435,7 +663,7 @@
         </div>
 
         <!-- ==================== REFERENCE LIBRARY TAB ==================== -->
-        <div id="referenceLibraryTab" class="tab-content hidden">
+        <div id="referenceLibraryTab" class="tab-content tab-panel">
             <h2 class="form-section-title">Reference Library</h2>
             <p class="text-gray-500 mb-4 text-sm">Typical pump selections from real industrial services. For reference and benchmarking only.</p>
             <div class="flex justify-between items-center mb-4">
@@ -468,7 +696,7 @@
         </div>
 
         <!-- ==================== FORMULA TAB ==================== -->
-        <div id="formulaTab" class="tab-content hidden bg-gray-50">
+        <div id="formulaTab" class="tab-content tab-panel" style="background:#f8fafc;">
             <h2 class="form-section-title">Calculation Formulas & Engineering Basis</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -526,13 +754,13 @@
         </div>
 
         <!-- ==================== PUMP TYPES TAB ==================== -->
-        <div id="pumpTypesTab" class="tab-content hidden">
+        <div id="pumpTypesTab" class="tab-content tab-panel">
             <h2 class="form-section-title">API 610 Pump Types</h2>
             <div id="pumpListContainer" class="space-y-5"></div>
         </div>
 
         <!-- ==================== HISTORY TAB ==================== -->
-        <div id="historyTab" class="tab-content hidden">
+        <div id="historyTab" class="tab-content tab-panel">
             <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
                 <div class="flex items-center gap-4">
                     <input type="search" id="historySearchInput" placeholder="Search by tag or project..." class="form-input w-64">
@@ -1423,6 +1651,7 @@ function handleSuggestion() {
     renderResultTab(result, values);
     document.getElementById('comparisonTabButton').classList.remove('hidden');
     renderComparisonTable();
+    // Ensure result tab is visible
 }
 
 function renderResultTab(result, values) {
@@ -1813,26 +2042,160 @@ function drawPumpChart(result) {
 }
 
 function drawApiChart(result) {
-    const canvas = document.getElementById('api610Chart'); if(!canvas) return;
+    const canvas = document.getElementById('api610Chart');
+    if (!canvas) return;
     if (apiChartInstance) apiChartInstance.destroy();
-    const zones=[
-        {label:'OH1/OH2',qMin:1,qMax:500,hMin:5,hMax:200,color:'rgba(147,197,253,0.25)'},
-        {label:'BB1/BB2',qMin:10,qMax:1200,hMin:20,hMax:500,color:'rgba(167,243,208,0.25)'},
-        {label:'BB3',qMin:50,qMax:4000,hMin:80,hMax:600,color:'rgba(253,230,138,0.25)'},
-        {label:'BB5',qMin:50,qMax:5000,hMin:400,hMax:2500,color:'rgba(252,165,165,0.25)'},
-        {label:'VS6',qMin:1,qMax:5000,hMin:5,hMax:600,color:'rgba(196,181,253,0.25)'},
+
+    // Zone definitions with full API 610 data
+    const zones = [
+        { label:'OH2',   desc:'Overhung, centerline',       qMin:1,   qMax:950,   hMin:5,   hMax:300,  maxP:50,  color:'rgba(59,130,246,',   solid:'#3b82f6' },
+        { label:'BB1/BB2',desc:'Between bearings, 1–2 stage',qMin:10, qMax:1135,  hMin:20,  hMax:500,  maxP:100, color:'rgba(16,185,129,',   solid:'#10b981' },
+        { label:'BB3',   desc:'Multistage, axially split',   qMin:45,  qMax:3400,  hMin:80,  hMax:650,  maxP:100, color:'rgba(245,158,11,',   solid:'#f59e0b' },
+        { label:'BB5',   desc:'Barrel, double casing',       qMin:20,  qMax:10000, hMin:200, hMax:3000, maxP:350, color:'rgba(239,68,68,',    solid:'#ef4444' },
+        { label:'VS6',   desc:'Vertical can, low NPSH',      qMin:1,   qMax:5000,  hMin:5,   hMax:600,  maxP:65,  color:'rgba(168,85,247,',   solid:'#a855f7' },
     ];
-    const datasets = zones.map(z=>({label:z.label,type:'scatter',showLine:false,
-        data:[{x:z.qMin,y:z.hMin},{x:z.qMax,y:z.hMin},{x:z.qMax,y:z.hMax},{x:z.qMin,y:z.hMax},{x:z.qMin,y:z.hMin}],
-        backgroundColor:z.color,borderColor:z.color.replace('0.25','0.6'),pointRadius:0}));
-    if (result&&!result.error&&result.status!=='fail')
-        datasets.push({label:'Operating Point',type:'scatter',data:[{x:result.flowUsedForCalc,y:parseFloat(result.totalHead)}],
-            backgroundColor:'#ef4444',radius:10,borderColor:'white',borderWidth:2});
-    apiChartInstance = new Chart(canvas.getContext('2d'),{type:'scatter',data:{datasets},
-        options:{responsive:true,maintainAspectRatio:true,
-            plugins:{title:{display:true,text:'API 610 Pump Selection Map',font:{size:14}},legend:{labels:{usePointStyle:true}}},
-            scales:{x:{type:'logarithmic',title:{display:true,text:'Flow (m³/hr)'},min:1,max:10000},
-                    y:{type:'logarithmic',title:{display:true,text:'Head (m)'},min:1,max:3000}}}});
+
+    // Build datasets
+    const datasets = zones.map(z => ({
+        label: z.label,
+        type: 'scatter',
+        showLine: true,
+        fill: true,
+        data: [
+            {x:z.qMin, y:z.hMin}, {x:z.qMax, y:z.hMin},
+            {x:z.qMax, y:z.hMax}, {x:z.qMin, y:z.hMax},
+            {x:z.qMin, y:z.hMin}
+        ],
+        backgroundColor: z.color + '0.12)',
+        borderColor:     z.color + '0.7)',
+        borderWidth: 1.5,
+        borderDash: [4, 3],
+        pointRadius: 0,
+        tension: 0,
+    }));
+
+    // Operating point + selected zone highlight
+    const hasResult = result && !result.error && result.status !== 'fail';
+    if (hasResult) {
+        const Q = result.flowUsedForCalc;
+        const H = parseFloat(result.totalHead);
+        const selType = result.finalSuggestedType;
+        const selZone = zones.find(z => selType && selType.startsWith(z.label.split('/')[0]));
+
+        // Highlight selected zone
+        if (selZone) {
+            datasets.push({
+                label: selZone.label + ' (Selected)',
+                type: 'scatter', showLine: true, fill: true,
+                data: [
+                    {x:selZone.qMin,y:selZone.hMin},{x:selZone.qMax,y:selZone.hMin},
+                    {x:selZone.qMax,y:selZone.hMax},{x:selZone.qMin,y:selZone.hMax},
+                    {x:selZone.qMin,y:selZone.hMin}
+                ],
+                backgroundColor: selZone.color + '0.22)',
+                borderColor:     selZone.color + '1)',
+                borderWidth: 2.5,
+                borderDash: [],
+                pointRadius: 0,
+            });
+        }
+
+        // Operating point — large marker
+        datasets.push({
+            label: `Operating Point  Q=${Q} m³/hr  H=${H.toFixed(0)} m`,
+            type: 'scatter', showLine: false,
+            data: [{x:Q, y:H}],
+            backgroundColor: '#f97316',
+            borderColor: 'white',
+            borderWidth: 2.5,
+            pointRadius: 10,
+            pointHoverRadius: 13,
+            pointStyle: 'crossRot',
+        });
+
+        // Update summary panel
+        const sumEl = document.getElementById('apiChartOpPoint');
+        if (sumEl) {
+            const inZone = zones.filter(z => Q>=z.qMin && Q<=z.qMax && H>=z.hMin && H<=z.hMax).map(z=>z.label);
+            sumEl.innerHTML = `
+                <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 10px;line-height:1.8;">
+                    <span style="color:#94a3b8;">Q rated</span><span style="font-weight:700;color:#1e293b;">${Q} m³/hr</span>
+                    <span style="color:#94a3b8;">Total H</span><span style="font-weight:700;color:#1e293b;">${H.toFixed(1)} m</span>
+                    <span style="color:#94a3b8;">Selected</span><span style="font-weight:700;color:#1d4ed8;">${selType || '—'}</span>
+                    <span style="color:#94a3b8;">In zones</span><span style="font-weight:600;color:#059669;">${inZone.join(', ') || 'None'}</span>
+                    <span style="color:#94a3b8;">Ns</span><span style="font-weight:600;color:#374151;">${result.finalNs || '—'}</span>
+                    <span style="color:#94a3b8;">Rank</span><span style="font-weight:600;color:#374151;">${result.rankScore || '—'}/100</span>
+                </div>`;
+        }
+    }
+
+    // Build zone legend
+    const legendEl = document.getElementById('apiZoneLegend');
+    if (legendEl) {
+        legendEl.innerHTML = zones.map(z =>
+            `<div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:14px;height:14px;border-radius:3px;background:${z.color}0.7);border:1.5px solid ${z.solid};flex-shrink:0;"></div>
+                <div><span style="font-weight:700;color:#1e293b;">${z.label}</span>
+                <span style="color:#94a3b8;"> — ${z.desc}</span></div>
+            </div>`
+        ).join('');
+    }
+
+    // Build zone table
+    const tableEl = document.getElementById('apiZoneTable');
+    if (tableEl) {
+        tableEl.innerHTML = zones.map((z,i) =>
+            `<tr style="background:${i%2?'white':'#f8fafc'};">
+                <td style="padding:4px 6px;font-weight:700;color:${z.solid};">${z.label}</td>
+                <td style="padding:4px 6px;text-align:center;color:#374151;">${z.qMin}–${z.qMax}</td>
+                <td style="padding:4px 6px;text-align:center;color:#374151;">${z.hMin}–${z.hMax}</td>
+                <td style="padding:4px 6px;text-align:center;color:#374151;">${z.maxP} bar</td>
+            </tr>`
+        ).join('');
+    }
+
+    // Draw chart
+    apiChartInstance = new Chart(canvas.getContext('2d'), {
+        type: 'scatter',
+        data: { datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            interaction: { mode:'point', intersect:true },
+            plugins: {
+                legend: {
+                    display: false,  // Using custom legend panel
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            if (ctx.dataset.label.includes('Operating Point'))
+                                return ` Q=${ctx.parsed.x} m³/hr  H=${ctx.parsed.y.toFixed(0)} m`;
+                            return ctx.dataset.label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'logarithmic',
+                    title: { display:true, text:'Flow Rate Q  (m³/hr)', font:{size:11,weight:'600'}, color:'#64748b' },
+                    min: 1, max: 12000,
+                    grid: { color:'rgba(0,0,0,0.05)' },
+                    ticks: { font:{size:10}, color:'#64748b',
+                        callback: v => [1,10,50,100,500,1000,5000,10000].includes(v) ? v : '' }
+                },
+                y: {
+                    type: 'logarithmic',
+                    title: { display:true, text:'Total Head H  (m)', font:{size:11,weight:'600'}, color:'#64748b' },
+                    min: 1, max: 4000,
+                    grid: { color:'rgba(0,0,0,0.05)' },
+                    ticks: { font:{size:10}, color:'#64748b',
+                        callback: v => [1,5,10,50,100,200,500,1000,2000,3000].includes(v) ? v : '' }
+                }
+            }
+        }
+    });
 }
 
 // =============================================================================
@@ -2085,6 +2448,7 @@ function resetForm(notify=true) {
     document.getElementById('resultTab').innerHTML='';
     document.getElementById('comparisonTab').innerHTML='';
     document.getElementById('comparisonTabButton').classList.add('hidden');
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active-tab'));
     document.getElementById('validationErrorArea').classList.add('hidden');
     updateCalculatedFields(document.getElementById('pumpForm'));
     if(notify){openTab('dataEntryTab');showNotification('Form reset.','success');}
@@ -2229,13 +2593,20 @@ function openTab(tabId) {
     if(!tabId) return;
     if(pumpChartInstance){pumpChartInstance.destroy();pumpChartInstance=null;}
     if(apiChartInstance) {apiChartInstance.destroy(); apiChartInstance=null;}
-    document.querySelectorAll('.tab-content').forEach(t=>t.classList.add('hidden'));
-    document.querySelectorAll('.tab-button').forEach(b=>b.classList.remove('active'));
-    const tab=document.getElementById(tabId); if(tab) tab.classList.remove('hidden');
-    const btn=document.getElementById(tabId+'Button'); if(btn) btn.classList.add('active');
+    // Hide all panels
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-tab'));
+    // Deactivate all tab buttons (both old .tab-button and new .tab-btn)
+    document.querySelectorAll('.tab-btn,.tab-button').forEach(b => b.classList.remove('active'));
+    // Show selected panel
+    const tab = document.getElementById(tabId);
+    if(tab) tab.classList.add('active-tab');
+    // Activate selected button
+    const btn = document.getElementById(tabId + 'Button');
+    if(btn) btn.classList.add('active');
+    // Redraw charts after layout settles
     if(tabId==='apiChartTab'||tabId==='chartTab') setTimeout(()=>redrawCharts(tabId),150);
-    else if(tabId==='historyTab')           renderHistoryList();
-    else if(tabId==='referenceLibraryTab')  renderReferenceLibrary();
+    else if(tabId==='historyTab')          renderHistoryList();
+    else if(tabId==='referenceLibraryTab') renderReferenceLibrary();
 }
 
 function showNotification(msg,type='success') {
@@ -2300,7 +2671,7 @@ function initializeApp() {
     populatePumpList();renderReferenceLibrary();renderCalculationSettings();resetForm(false);
 
     // Tab buttons
-    document.querySelectorAll('.tab-button').forEach(btn=>btn.addEventListener('click',()=>openTab(btn.dataset.tab)));
+    document.querySelectorAll('.tab-btn,.tab-button').forEach(btn=>btn.addEventListener('click',()=>openTab(btn.dataset.tab)));
 
     // Fullscreen
     const fsBtn=document.getElementById('fullscreenBtn');
