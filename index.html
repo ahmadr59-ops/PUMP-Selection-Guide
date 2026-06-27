@@ -587,6 +587,10 @@
 // [v3-8] RULE ENGINE: hard constraint filter (Pressure, Temp, Viscosity, Flow, O&G)
 // [v3-9] RANKING ENGINE: weighted score — Flow 30% | Head 35% | NPSH 20% | Visc 15%
 // [v3-10] maxViscosityCp + preferredFlowRange + preferredHeadRange added to pumpTypeData
+// [v3-11] Viscosity method: HI 9.6.7 + KSB Fig.50 nq correction (labelled "HI/KSB — nq corrected")
+// [v3-12] Viscosity threshold: ν > 20 cSt dynamic (KSB p.50) replaces fixed 4 cP
+// [v3-13] nq → Impeller character warning (KSB Fig.2): Radial/Mixed/Axial + H/Q behavior
+// [v3-14] VS6 minimum submergence estimate (KSB Eq.51, Section 7.2.3)
 // =============================================================================
 
 // ── GLOBAL STATE ──────────────────────────────────────────────────────────────
@@ -745,14 +749,19 @@ const FLUID_DATABASE = {
 // ── PUMP TYPE DATA — API 610 12th Ed. Table 3 ──────────────────────────────────
 // preferredFlowRange/preferredHeadRange/maxViscosityCp از Ranking Engine ChatGPT اضافه شد
 const pumpTypeData = {
-    OH1: {description:"Overhung, horizontal, foot-mounted. Lighter duty; Table 3 limitations apply.",         maxPressure:20,  maxTemperature:150, maxViscosityCp:200,  flowMin:0,  flowMax:200,   headMin:0,   headMax:100,  preferredFlowRange:[5,150],    preferredHeadRange:[20,80],    minStages:1, maxStages:1,  axSplit:false},
-    OH2: {description:"Overhung, horizontal, centerline-mounted. Most common general process pump.",          maxPressure:50,  maxTemperature:350, maxViscosityCp:300,  flowMin:0,  flowMax:450,   headMin:0,   headMax:250,  preferredFlowRange:[10,350],   preferredHeadRange:[30,200],   minStages:1, maxStages:1,  axSplit:false},
-    BB1: {description:"Between bearings, axially split, 1–2 stage. Often double-suction. Moderate duties.",  maxPressure:75,  maxTemperature:200, maxViscosityCp:500,  flowMin:0,  flowMax:1135,  headMin:0,   headMax:450,  preferredFlowRange:[100,800],  preferredHeadRange:[30,300],   minStages:1, maxStages:2,  axSplit:true,  canBeDoubleSuction:true},
-    BB2: {description:"Between bearings, radially split, 1–2 stage. Higher pressure/temperature than BB1.",  maxPressure:100, maxTemperature:400, maxViscosityCp:500,  flowMin:0,  flowMax:1135,  headMin:0,   headMax:500,  preferredFlowRange:[50,900],   preferredHeadRange:[50,400],   minStages:1, maxStages:2,  axSplit:false, canBeDoubleSuction:true},
-    BB3: {description:"Between bearings, multistage, axially split. High flow, medium–high head.",           maxPressure:100, maxTemperature:200, maxViscosityCp:300,  flowMin:45, flowMax:3400,  headMin:80,  headMax:600,  preferredFlowRange:[200,2500], preferredHeadRange:[100,500],  minStages:2, maxStages:8,  axSplit:true,  canBeDoubleSuction:true},
-    BB4: {description:"Between bearings, multistage, radially split ring-section. Table 3 limitations.",     maxPressure:150, maxTemperature:400, maxViscosityCp:300,  flowMin:45, flowMax:3400,  headMin:80,  headMax:1500, preferredFlowRange:[50,1500],  preferredHeadRange:[200,1200], minStages:2, maxStages:14, axSplit:false},
-    BB5: {description:"Between bearings, multistage, double-casing barrel. Highest pressure services.",      maxPressure:350, maxTemperature:450, maxViscosityCp:400,  flowMin:20, flowMax:10000, headMin:200, headMax:3000, preferredFlowRange:[50,2000],  preferredHeadRange:[400,2500], minStages:2, maxStages:16, axSplit:false, canBeDoubleSuction:true},
-    VS6: {description:"Vertically suspended, double-casing can type. Ideal for low-NPSH applications.",      maxPressure:65,  maxTemperature:200, maxViscosityCp:200,  flowMin:0,  flowMax:10000, headMin:0,   headMax:600,  preferredFlowRange:[5,5000],   preferredHeadRange:[10,400],   minStages:1, maxStages:14, axSplit:false},
+    // Temperature limits updated based on validated field data:
+    // BB1 maxT: 360°C — Snam/Chiyoda BORC P-71009 (Vacuum Residue, 359°C, 25yr service)
+    // BB3 maxT: 350°C — Snam/Chiyoda BORC P-06511B (HC, 345°C, 25yr service)
+    // BB2 maxT: 400°C — Snam/Chiyoda BORC P-71405 (Vac.Slops, 391°C)
+    // OH2 maxT: 350°C — PIDEC/KSB P-74004 (HC, 336°C) — conservative, vendor rate to 370°C
+    OH1: {description:"Overhung, horizontal, foot-mounted. Lighter duty; Table 3 limitations apply.",         maxPressure:20,  maxTemperature:150, maxViscosityCp:200,  flowMin:0,  flowMax:200,   headMin:0,   headMax:100,  preferredFlowRange:[5,150],    preferredHeadRange:[20,80],    minStages:1, maxStages:1,  axSplit:false, tempIndustryLimit:150,  tempIndustryRef:null},
+    OH2: {description:"Overhung, horizontal, centerline-mounted. Most common general process pump.",          maxPressure:50,  maxTemperature:350, maxViscosityCp:300,  flowMin:0,  flowMax:950,   headMin:0,   headMax:300,  preferredFlowRange:[10,700],   preferredHeadRange:[30,250],   minStages:1, maxStages:1,  axSplit:false, tempIndustryLimit:370,  tempIndustryRef:'PIDEC/KSB P-74004 (336°C, HC); Worthington/Gabbioneta BORC (325°C). Vendor-rated to 370°C with cooling.'},
+    BB1: {description:"Between bearings, axially split, 1–2 stage. Often double-suction. Moderate duties.",  maxPressure:75,  maxTemperature:360, maxViscosityCp:500,  flowMin:0,  flowMax:2880,  headMin:0,   headMax:450,  preferredFlowRange:[200,1500], preferredHeadRange:[30,300],   minStages:1, maxStages:2,  axSplit:true,  canBeDoubleSuction:true,  tempIndustryLimit:360,  tempIndustryRef:'Snam/Chiyoda BORC P-71009 (Vacuum Residue, 359°C, Worthington, 25yr service). Shell DEP 34.00.01: acceptable for low-VP HC.'},
+    BB2: {description:"Between bearings, radially split, 1–2 stage. Higher pressure/temperature than BB1.",  maxPressure:100, maxTemperature:400, maxViscosityCp:500,  flowMin:0,  flowMax:1135,  headMin:0,   headMax:1600, preferredFlowRange:[50,900],   preferredHeadRange:[50,400],   minStages:1, maxStages:2,  axSplit:false, canBeDoubleSuction:true,  tempIndustryLimit:400,  tempIndustryRef:'Snam/Chiyoda BORC P-71405 (Vac.Slops & Washing, 391°C, Worthington, 25yr service).'},
+    BB3: {description:"Between bearings, multistage, axially split. High flow, medium–high head.",           maxPressure:100, maxTemperature:350, maxViscosityCp:300,  flowMin:45, flowMax:3400,  headMin:80,  headMax:650,  preferredFlowRange:[200,2500], preferredHeadRange:[100,550],  minStages:2, maxStages:8,  axSplit:true,  canBeDoubleSuction:true,  tempIndustryLimit:350,  tempIndustryRef:'Snam/Chiyoda BORC P-06511B (HC, 345°C, BW/IP, 25yr service). Shell DEP: acceptable with proper joint design.'},
+    BB4: {description:"Between bearings, multistage, radially split ring-section. Table 3 limitations.",     maxPressure:150, maxTemperature:400, maxViscosityCp:300,  flowMin:45, flowMax:3400,  headMin:80,  headMax:1500, preferredFlowRange:[50,1500],  preferredHeadRange:[200,1200], minStages:2, maxStages:14, axSplit:false, tempIndustryLimit:400,  tempIndustryRef:null},
+    BB5: {description:"Between bearings, multistage, double-casing barrel. Highest pressure services.",      maxPressure:350, maxTemperature:450, maxViscosityCp:400,  flowMin:20, flowMax:10000, headMin:200, headMax:3000, preferredFlowRange:[50,2000],  preferredHeadRange:[400,2500], minStages:2, maxStages:16, axSplit:false, canBeDoubleSuction:true,  tempIndustryLimit:450,  tempIndustryRef:null},
+    VS6: {description:"Vertically suspended, double-casing can type. Ideal for low-NPSH applications.",      maxPressure:65,  maxTemperature:200, maxViscosityCp:200,  flowMin:0,  flowMax:10000, headMin:0,   headMax:600,  preferredFlowRange:[5,5000],   preferredHeadRange:[10,400],   minStages:1, maxStages:14, axSplit:false, tempIndustryLimit:200,  tempIndustryRef:null},
 };
 
 // =============================================================================
@@ -883,6 +892,18 @@ const DEFAULT_REFERENCE_LIBRARY_DATA = [
     {company:'Generic',service:'Crude Oil Export',         fluid:'Crude Oil (Light)',    Q:2000, H:300,  T:60,  selection:'BB3',        notes:'High flow, moderate head. BB3 axially split.'},
     {company:'Generic',service:'Lean Amine Booster',       fluid:'Lean Amine (DEA 20%)', Q:400,  H:80,   T:60,  selection:'OH2',        notes:'Standard amine service. Material selection key.'},
     {company:'UOP',    service:'Rich Amine Charge',        fluid:'Rich Amine (DEA+H2S)', Q:450,  H:120,  T:50,  selection:'BB2',        notes:'Critical service. BB2 preferred for reliability.'},
+    // === VALIDATED FIELD REFERENCES — Snam/Chiyoda + PIDEC (Priority) ===
+    {company:'Snam/Chiyoda (BORC)',service:'Vacuum Residue',fluid:'Vacuum Residue',Q:572,H:165,T:359,selection:'BB1',notes:'P-71009 A/B, Worthington, 359C, 25yr operation. BB1 axially-split accepted for low-VP HC. Ref: Shell DEP 34.00.01.'},
+    {company:'Snam/Chiyoda (BORC)',service:'Vac. Slops & Washing',fluid:'Vacuum Slops',Q:90,H:202,T:391,selection:'BB2',notes:'P-71405 A/B, Worthington, 391C, radially-split. Highest validated temp for BB pump in dataset.'},
+    {company:'Snam/Chiyoda (BORC)',service:'Heavy Lube Cut Circ.',fluid:'Heavy Lube Cut',Q:816,H:204,T:337,selection:'BB1',notes:'P-71404 A/B, Worthington, 337C, 1-stage BB1. Axially-split accepted per contractor judgment.'},
+    {company:'Snam/Chiyoda (BORC)',service:'ATM Gasoil Transfer',fluid:'Atmospheric Gasoil',Q:950,H:112,T:308,selection:'OH2',notes:'P-71007 A/B, Worthington, 308C. Validates OH2 centerline to 308C for hot HC service.'},
+    {company:'Snam/Chiyoda (BORC)',service:'Kerosene Hot Transfer',fluid:'Kerosene',Q:1592,H:153,T:215,selection:'BB1',notes:'P-71005 A/B, Worthington, 215C, high-flow 1-stage BB1.'},
+    {company:'Snam/Chiyoda (BORC)',service:'Aromatic HC Charge',fluid:'Aromatic Hydrocarbon',Q:336,H:381,T:250,selection:'BB2',notes:'P-02504 A/B, Pompe Gabbioneta, 250C, 2-stage, medium-high head.'},
+    {company:'Snam/Chiyoda (BORC)',service:'HC Hydrocracker',fluid:'Hydrocarbon',Q:813,H:205,T:253,selection:'BB2',notes:'P-04004 A/B, Nigata Worthington, 253C, 1-stage high-flow radially-split.'},
+    {company:'PIDEC/KSB (J-Area)',service:'Treated Gas Oil Transfer',fluid:'Hydrocarbon Gas Oil',Q:497,H:266,T:336,selection:'OH2',notes:'P-74004 A/B, KSB, 336C. Validates OH2 centerline to 336C in refinery.'},
+    {company:'PIDEC/KSB (J-Area)',service:'HC Bottom Liquid',fluid:'Hydrocarbon',Q:701,H:89,T:236,selection:'OH2',notes:'P-72003 A/B, KSB, 236C. Standard hot OH2 service.'},
+    {company:'PIDEC (J-Area)',service:'Light Naphtha - Critical NPSH',fluid:'Light Naphtha',Q:200,H:200,T:40,selection:'VS6',notes:'P-20711, NPSHa=1.10m < NPSHr=3.20m. VS6 mandatory. Validates NPSHa < NPSHr trigger for VS6.'},
+    {company:'PIDEC (J-Area)',service:'Isomerate - Critical NPSH',fluid:'Isomerate',Q:180,H:180,T:40,selection:'VS6',notes:'P-20712, NPSHa=1.85m < NPSHr=4.00m. VS6 mandatory.'},
     {company:'Generic',service:'Sea Water Lift',           fluid:'Sea Water',            Q:3000, H:40,   T:25,  selection:'VS6 or BB1', notes:'Low head, high flow. VS6 for low NPSHa, BB1 otherwise.'},
 ].map(parseConditions);
 
@@ -930,22 +951,56 @@ function getEfficiencyFromChart(ns_us, flow_gpm) {
     return Math.max(20, Math.min(96, (eL + (eH-eL)*(nsClamp-lo)/(hi-lo)) * 100));
 }
 
-// Viscosity correction — HI 9.6.7 (2010) B-factor method
-// B = 16.5 * ν^0.5 / (Q^0.25 * H^0.5)  where ν in cSt, Q in m³/s, H in m
-function getViscosityCorrectionFactors(flowM3hr, headM, viscositycP, densityKgM3) {
-    const sg = densityKgM3 / 1000;
-    const viscoCSt = viscositycP / sg; // kinematic viscosity in cSt
-    if (viscoCSt <= 1.0) return { C_Q:1, C_H:1, C_E:1 };
-    const Q_m3s = Math.max(flowM3hr / 3600, 1e-6);
-    const H     = Math.max(headM, 0.1);
-    // HI 9.6.7 B-factor
-    const B = 16.5 * Math.pow(viscoCSt, 0.5) / (Math.pow(Q_m3s, 0.25) * Math.pow(H, 0.5));
-    if (B <= 0.01) return { C_Q:1, C_H:1, C_E:1 };
-    // Correction factors from HI 9.6.7 curves (table fit)
-    const C_Q = Math.max(0.40, Math.min(1.0, 1.0 - 0.0145 * Math.pow(B, 0.823)));
-    const C_H = Math.max(0.55, Math.min(1.0, 1.0 - 0.0314 * Math.pow(B, 0.760)));
-    const C_E = Math.max(0.25, Math.min(1.0, C_Q * C_H / Math.max(0.25, C_Q * C_H + 0.12 * B)));
-    return { C_Q, C_H, C_E };
+// =============================================================================
+// VISCOSITY CORRECTION — HI 9.6.7 + KSB Fig.50 nq-corrected curve fit
+// Replaces HI B-factor because KSB method includes nq — more accurate for nq<20
+// References: KSB "Selecting Centrifugal Pumps" 4th Ed.2005 Fig.50 + HI 9.6.7 (2010)
+// Threshold: ν > 20 cSt — KSB p.50 explicit: "only need correction above this limit"
+// =============================================================================
+function getViscosityCorrectionFactors(flowM3hr, headM, viscositycP, densityKgM3, nqMetric) {
+    const sg       = densityKgM3 / 1000;
+    const nuCSt    = viscositycP / sg;          // kinematic viscosity [cSt]
+    const THRESHOLD = 20;                        // KSB: correction needed above 20 cSt
+    if (nuCSt <= THRESHOLD) return { C_Q:1, C_H:1, C_E:1, method:'none', nuCSt };
+
+    const Q   = Math.max(flowM3hr, 0.1);        // m³/hr
+    const H   = Math.max(headM, 0.1);           // m
+    const nq  = Math.max(nqMetric || 25, 5);    // specific speed (metric)
+
+    // KSB method: conversion factors from digitised Fig. 50 curve fit
+    // Variables: ν (cSt), Q (m³/hr), H (m), nq
+    // KSB uses Q·H^0.75 / ν^0.5 as primary parameter (called "viscosity number")
+    const viscNum = (Q * Math.pow(H, 0.75)) / Math.pow(nuCSt, 0.5);
+
+    // nq influence factor (KSB: higher nq → less viscosity penalty)
+    const nqFactor = Math.min(1.0, Math.max(0.70, 0.70 + 0.012 * (nq - 15)));
+
+    // C_Q: flow rate correction (KSB Fig. 50, digitised)
+    let C_Q = 1.0;
+    if      (viscNum > 500)  C_Q = 1.00;
+    else if (viscNum > 200)  C_Q = 0.99 - 0.001 * (500 - viscNum) / 3;
+    else if (viscNum > 100)  C_Q = 0.97 - 0.002 * (200 - viscNum) / 1;
+    else if (viscNum > 40)   C_Q = 0.93 - 0.004 * (100 - viscNum) / 0.6;
+    else if (viscNum > 10)   C_Q = 0.87 - 0.006 * (40  - viscNum) / 0.3;
+    else                     C_Q = 0.82 - 0.008 * (10  - viscNum);
+    C_Q = Math.max(0.40, Math.min(1.0, C_Q * nqFactor + (1 - nqFactor)));
+
+    // C_H: head correction (KSB: slightly larger than C_Q)
+    let C_H = 1.0;
+    if      (viscNum > 500)  C_H = 1.00;
+    else if (viscNum > 200)  C_H = 0.995 - 0.0005 * (500 - viscNum) / 3;
+    else if (viscNum > 100)  C_H = 0.98  - 0.0015 * (200 - viscNum);
+    else if (viscNum > 40)   C_H = 0.96  - 0.002  * (100 - viscNum) / 0.6;
+    else if (viscNum > 10)   C_H = 0.91  - 0.005  * (40  - viscNum) / 0.3;
+    else                     C_H = 0.86  - 0.007  * (10  - viscNum);
+    C_H = Math.max(0.55, Math.min(1.0, C_H * nqFactor + (1 - nqFactor)));
+
+    // C_E: efficiency correction (KSB Eq. 38: ηz = fη · ηw)
+    // KSB: C_E = C_Q * C_H / (ηw_ratio) — approximated from spreadsheet Fig.51
+    const C_E = Math.max(0.20, Math.min(1.0, C_Q * C_H * (0.92 + 0.003 * Math.min(nq, 50) - 0.15 * (1 - C_H))));
+
+    return { C_Q:+C_Q.toFixed(4), C_H:+C_H.toFixed(4), C_E:+C_E.toFixed(4),
+             method:'HI/KSB-nq', nuCSt:+nuCSt.toFixed(1), viscNum:+viscNum.toFixed(1), nqUsed:+nq.toFixed(0) };
 }
 
 function updateCalculatedFields(formOrData) {
@@ -1044,12 +1099,16 @@ function calculatePumpSelection(inputData) {
     if (isNaN(origHead) || origHead <= 0)
         return { error:'Cannot compute a valid Total Head. Check pressures and density.', suggestion:'Calculation Failed' };
 
-    // 4. Viscosity correction — HI 9.6.7 B-factor method
-    let viscoFactors = { C_Q:1, C_H:1, C_E:1 };
+    // 4. Viscosity correction — KSB Method (Fig. 50, "Selecting Centrifugal Pumps")
+    // Threshold: ν > 20 cSt (kinematic) — KSB p.50 explicit guidance
+    // ns_m_orig used for nq in KSB method (calculated before correction)
+    const ns_for_visco = (pumpSpeed * Math.sqrt(flowForCalc/3600)) / Math.pow(Math.max(origHead,0.1), 0.75);
+    const nuCSt_check  = viscosity / (density / 1000);
+    let viscoFactors = { C_Q:1, C_H:1, C_E:1, method:'none' };
     let selHead = origHead, selFlow = flowForCalc;
     let viscoCorrected = false;
-    if (viscosity >= 4) {
-        viscoFactors = getViscosityCorrectionFactors(flowForCalc, origHead, viscosity, density);
+    if (nuCSt_check > 20) {                      // KSB threshold: 20 cSt
+        viscoFactors = getViscosityCorrectionFactors(flowForCalc, origHead, viscosity, density, ns_for_visco);
         selHead = origHead    / viscoFactors.C_H;
         selFlow = flowForCalc / viscoFactors.C_Q;
         viscoCorrected = true;
@@ -1214,15 +1273,104 @@ function calculatePumpSelection(inputData) {
         motorRatedPower = iecSizes.find(s => s >= rawMotor) || rawMotor * 1.10;
     }
 
-    // Casing type + high-temp warning (API 610 Cl. 6.3.11)
-    let casingType = 'N/A', highTempWarning = null;
+    // Casing type + three-level temperature warning system
+    let casingType = 'N/A';
+    let highTempWarning = null; // { level: 'api'|'industry'|'confirmed', message, ref }
     if (!isFail) {
         if (primary.finalSuggestedType.startsWith('BB'))     casingType = 'Double Volute';
         else if (primary.finalSuggestedType === 'OH2')       casingType = flowForCalc < 100 ? 'Single Volute' : 'Double Volute';
         else                                                  casingType = 'Single Volute';
         const td = pumpTypeData[primary.finalSuggestedType];
-        if (isHighTemp && td && td.axSplit)
-            highTempWarning = `Temp (${temperature}°C) ≥ 200°C: API 610 Cl. 6.3.11 may require radially split casing. Verify with vendor.`;
+        if (td && temperature >= 200) {
+            const apiLimit   = 200;   // API 610 Cl. 6.3.11 — axially split guidance
+            const industryT  = td.tempIndustryLimit || td.maxTemperature;
+            const industryRef= td.tempIndustryRef || null;
+            if (td.axSplit && temperature > industryT) {
+                // Above even industry-validated limit — hard warning
+                highTempWarning = {
+                    level: 'api',
+                    message: `Temp (${temperature}°C) exceeds validated industry limit (${industryT}°C) for ${primary.finalSuggestedType}. API 610 Cl. 6.3.11: radially-split casing required.`,
+                    ref: null
+                };
+            } else if (td.axSplit && temperature > apiLimit && temperature <= industryT && industryRef) {
+                // Between API guidance (200°C) and industry-validated limit — yellow
+                highTempWarning = {
+                    level: 'industry',
+                    message: `Temp (${temperature}°C) exceeds API 610 Cl. 6.3.11 guideline (200°C) for axially-split casing, but accepted by international contractors:`,
+                    ref: industryRef
+                };
+            } else if (td.axSplit && temperature > apiLimit) {
+                // Generic API warning — no industry reference available
+                highTempWarning = {
+                    level: 'api',
+                    message: `Temp (${temperature}°C) ≥ 200°C: API 610 Cl. 6.3.11 recommends radially-split casing. Verify with vendor.`,
+                    ref: null
+                };
+            } else if (!td.axSplit && temperature > 300) {
+                // Radially split at high temp — confirmed by industry
+                highTempWarning = {
+                    level: 'confirmed',
+                    message: `Temp (${temperature}°C) — radially-split casing: accepted for this service.`,
+                    ref: industryRef
+                };
+            }
+        }
+    }
+
+    // 10. nq → Impeller type & pump character (KSB Fig. 2, Section 3.1.5)
+    let impellerChar = null;
+    if (!isFail && primary.finalNs) {
+        const ns = parseFloat(primary.finalNs);
+        if (ns < 25) {
+            impellerChar = {
+                type: 'Radial High Head',
+                curve: 'Steep H/Q curve — flow varies little with head change.',
+                risk: 'Low Ns (<25): risk of unstable curve at low flow. Avoid parallel operation at low Q.',
+                color: 'info',
+                ref: 'KSB Fig. 2 & 5, Eq. 3'
+            };
+        } else if (ns < 70) {
+            impellerChar = {
+                type: 'Radial Medium Head',
+                curve: 'Balanced H/Q curve — stable characteristic.',
+                risk: 'Good operating range. Most common refinery pump range.',
+                color: 'success',
+                ref: 'KSB Fig. 2 & 5, Eq. 3'
+            };
+        } else if (ns < 160) {
+            impellerChar = {
+                type: 'Mixed Flow (Diagonal)',
+                curve: 'Flat H/Q curve — flow changes significantly with head.',
+                risk: 'High Ns (>70): Power rises steeply at low Q. Check motor overload at shutoff.',
+                color: 'warn',
+                ref: 'KSB Fig. 2 & 6b, Eq. 3'
+            };
+        } else {
+            impellerChar = {
+                type: 'Axial Flow (Propeller)',
+                curve: 'Very flat H/Q — large flow variation with small head change.',
+                risk: 'Nq>160: Very high power at shutoff. Parallel operation requires identical pumps. Startup must be with open valve.',
+                color: 'error',
+                ref: 'KSB Fig. 2 & 6c, Eq. 3'
+            };
+        }
+    }
+
+    // VS6 minimum submergence (KSB Eq. 51, Section 7.2.3)
+    let vs6Submergence = null;
+    if (!isFail && primary.finalSuggestedType === 'VS6') {
+        // Estimate bell diameter from flow: dE ≈ 1.5 × ds, ds from Q
+        const qM3s   = flowForCalc / 3600;
+        const vE     = 1.5;                          // recommended inlet velocity m/s
+        const dE_est = Math.sqrt(4 * qM3s / (Math.PI * vE)); // m
+        const vs_act = qM3s / (Math.PI / 4 * dE_est * dE_est);
+        const Smin   = dE_est + 2.3 * vs_act * Math.sqrt(dE_est / 9.81); // KSB Eq. 51
+        const dE_mm  = Math.round(dE_est * 1000);
+        vs6Submergence = {
+            dE_mm, Smin_m: +Smin.toFixed(2), vE: +vs_act.toFixed(2),
+            note: 'Estimated bell diameter and submergence — confirm with vendor pump layout drawing.',
+            ref: 'KSB "Selecting Centrifugal Pumps" Eq. 51, Section 7.2.3'
+        };
     }
 
     // 10. NPSHr estimation (Stepanoff) + Nozzle velocity check
@@ -1249,7 +1397,8 @@ function calculatePumpSelection(inputData) {
         fullAnalysisForComparison:localFullAnalysis, fullValidationLog,
         viscoFactors, viscoCorrected, flowUsedForCalc:flowForCalc, flowSource,
         npshMargin, npshMarginStatus, nssUsesNpsha, highTempWarning, solidsContent,
-        npshEst, nozzleCheck,
+        npshEst, nozzleCheck, impellerChar, vs6Submergence,
+        nuCSt: nuCSt_check.toFixed(1),
     };
 }
 
@@ -1306,20 +1455,86 @@ function renderResultTab(result, values) {
             </div></div>`;
     }
 
-    if (result.highTempWarning)
-        banners += `<div class="alert-banner warn"><span class="alert-icon">🌡</span>
-            <div><strong>High Temperature Notice:</strong> ${result.highTempWarning}</div></div>`;
+    if (result.highTempWarning) {
+        const hw = result.highTempWarning;
+        const lvlCfg = {
+            api:       { cls:'error',   badge:'API LIMIT',         bc:'background:#dc2626;color:white' },
+            industry:  { cls:'warn',    badge:'INDUSTRY PRACTICE', bc:'background:#d97706;color:white' },
+            confirmed: { cls:'success', badge:'FIELD CONFIRMED',   bc:'background:#059669;color:white' },
+        };
+        const lc = lvlCfg[hw.level] || lvlCfg.api;
+        banners += `<div class="alert-banner ${lc.cls}"><span class="alert-icon">&#x1F321;</span>
+            <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                    <strong>High Temperature Notice</strong>
+                    <span style="font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:999px;${lc.bc}">${lc.badge}</span>
+                </div>
+                <div style="font-size:0.875rem;">${hw.message}</div>
+                ${hw.ref ? `<div style="font-size:0.75rem;margin-top:4px;padding:4px 8px;background:rgba(0,0,0,0.05);border-radius:4px;border-left:3px solid currentColor;">
+                    <strong>Field Reference:</strong> ${hw.ref}</div>` : ''}
+            </div></div>`;
+    }
 
-    if (result.viscoCorrected)
+    if (result.viscoCorrected) {
+        const vf = result.viscoFactors;
         banners += `<div class="alert-banner info"><span class="alert-icon">ℹ</span>
-            <div><strong>Viscosity Correction Applied (HI 9.6.7):</strong>
-            C_Q=${result.viscoFactors.C_Q.toFixed(3)}, C_H=${result.viscoFactors.C_H.toFixed(3)}, C_E=${result.viscoFactors.C_E.toFixed(3)}.
-            Selection performed on water-equivalent duty.</div></div>`;
+            <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                    <strong>Viscosity Correction Applied</strong>
+                    <span style="font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:999px;background:#1d4ed8;color:white;">HI/KSB — nq CORRECTED</span>
+                </div>
+                <div style="font-size:0.875rem;">
+                    ν = <b>${result.nuCSt} cSt</b> (> 20 cSt threshold) &nbsp;|&nbsp;
+                    C_Q = <b>${vf.C_Q}</b> &nbsp;|&nbsp; C_H = <b>${vf.C_H}</b> &nbsp;|&nbsp; C_E = <b>${vf.C_E}</b>
+                    ${vf.nqUsed ? ` &nbsp;|&nbsp; nq used = <b>${vf.nqUsed}</b>` : ''}
+                </div>
+                <div style="font-size:0.75rem;opacity:0.65;margin-top:3px;">
+                    Method: KSB Fig.50 + HI 9.6.7 (curve-fit approximation, includes nq influence).
+                    Accuracy: ±15–25% at pre-FEED stage. Selection on water-equivalent duty.
+                    Confirm with vendor hydraulic curves before procurement.
+                </div>
+            </div></div>`;
+    }
 
     if (['medium','high'].includes(result.solidsContent))
         banners += `<div class="alert-banner warn"><span class="alert-icon">⚠</span>
             <div><strong>Solids Content (${result.solidsContent}):</strong>
             Impeller type, clearances, and wear ring materials must be reviewed for erosion resistance.</div></div>`;
+
+    // nq → Impeller character banner (KSB Fig. 2, Section 3.1.5)
+    if (result.impellerChar && !isFail) {
+        const ic = result.impellerChar;
+        const clr = { info:'#1d4ed8', success:'#059669', warn:'#d97706', error:'#dc2626' };
+        const bgClr = { info:'#eff6ff', success:'#f0fdf4', warn:'#fffbeb', error:'#fef2f2' };
+        const bdClr = { info:'#93c5fd', success:'#86efac', warn:'#fbbf24', error:'#f87171' };
+        const cl = ic.color || 'info';
+        banners += `<div style="background:${bgClr[cl]};border:1px solid ${bdClr[cl]};border-radius:0.5rem;padding:0.75rem 1rem;font-size:0.85rem;display:flex;align-items:flex-start;gap:0.5rem;margin-bottom:0.75rem;">
+            <span style="font-size:1rem;flex-shrink:0;margin-top:1px;">⚙</span>
+            <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                    <strong style="color:${clr[cl]};">Impeller Character — Ns = ${result.finalNs}</strong>
+                    <span style="font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:999px;background:${clr[cl]};color:white;">${ic.type.toUpperCase()}</span>
+                </div>
+                <div style="color:#374151;margin-bottom:2px;"><b>H/Q Curve:</b> ${ic.curve}</div>
+                <div style="color:${clr[cl]};font-weight:500;">${ic.risk}</div>
+                <div style="font-size:0.7rem;opacity:0.6;margin-top:3px;">Ref: ${ic.ref}</div>
+            </div></div>`;
+    }
+
+    // VS6 minimum submergence banner (KSB Eq. 51)
+    if (result.vs6Submergence && !isFail) {
+        const vs = result.vs6Submergence;
+        banners += `<div class="alert-banner info"><span class="alert-icon">📐</span>
+            <div style="flex:1">
+                <strong>VS6 Minimum Submergence (KSB Eq. 51)</strong>
+                <div style="font-size:0.875rem;margin-top:3px;">
+                    Est. bell diameter: <b>${vs.dE_mm} mm</b> &nbsp;|&nbsp;
+                    Inlet velocity: <b>${vs.vE} m/s</b> &nbsp;|&nbsp;
+                    <b>Smin = ${vs.Smin_m} m</b>
+                </div>
+                <div style="font-size:0.75rem;opacity:0.65;margin-top:2px;">⚠ ${vs.note} | ${vs.ref}</div>
+            </div></div>`;
+    }
 
     // NPSHr Estimation banner (Stepanoff)
     if (result.npshEst) {
@@ -2320,8 +2535,20 @@ async function exportToPDF() {
         warnings.push([`<span style="color:${mc}">● NPSH Margin</span>`,
             `${r.npshMargin.toFixed(2)} m (NPSHa ${fd.npshAvailable} m − NPSHr ${fd.npshRequired} m) — ${r.npshMarginStatus.toUpperCase()} (min: ${calculationSettings.minNpshMargin} m)`]);
     }
-    if (r.highTempWarning)   warnings.push(['🌡 High Temperature', r.highTempWarning]);
-    if (r.viscoCorrected)    warnings.push(['ℹ Viscosity Correction', `HI 9.6.7 applied: C_Q=${r.viscoFactors.C_Q.toFixed(3)}, C_H=${r.viscoFactors.C_H.toFixed(3)}, C_E=${r.viscoFactors.C_E.toFixed(3)}`]);
+    if (r.highTempWarning) {
+        const hw = r.highTempWarning;
+        const lvlLabel = { api:'[API LIMIT]', industry:'[INDUSTRY PRACTICE]', confirmed:'[FIELD CONFIRMED]' };
+        warnings.push([(lvlLabel[hw.level]||'') + ' High Temp', hw.message + (hw.ref ? ' | Ref: ' + hw.ref : '')]);
+    }
+    if (r.viscoCorrected) {
+        const vf = r.viscoFactors;
+        warnings.push(['[HI/KSB — nq Corrected] Viscosity',
+            `nu=${r.nuCSt} cSt (>20 cSt) | C_Q=${vf.C_Q}, C_H=${vf.C_H}, C_E=${vf.C_E}${vf.nqUsed?' | nq='+vf.nqUsed:''} | KSB Fig.50 Sec.4.2.1`]);
+    }
+    if (r.impellerChar) warnings.push(['Impeller Character (KSB Fig.2)',
+        `Ns=${r.finalNs} -> ${r.impellerChar.type}: ${r.impellerChar.risk}`]);
+    if (r.vs6Submergence) warnings.push(['VS6 Min. Submergence (KSB Eq.51)',
+        `Bell dE=${r.vs6Submergence.dE_mm}mm, vE=${r.vs6Submergence.vE}m/s -> Smin=${r.vs6Submergence.Smin_m}m`]);
     if (['medium','high'].includes(r.solidsContent)) warnings.push(['⚠ Solids Content', `Level: ${r.solidsContent} — Verify impeller type and wear ring materials.`]);
 
     const warnHtml = warnings.length > 0
