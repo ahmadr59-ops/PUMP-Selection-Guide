@@ -2342,34 +2342,116 @@ function renderHistoryList() {
 
     if(filtered.length===0){lc.innerHTML='<p class="text-center text-gray-500 py-8">No records found.</p>';return;}
 
-    lc.innerHTML=`<table class="min-w-full divide-y divide-gray-200 text-xs">
-        <thead class="bg-gray-50"><tr>
-            <th class="px-2 py-2"><input type="checkbox" id="selectAllHistoryCheckboxHeader"></th>
-            <th class="px-2 py-2">Lib</th><th class="px-2 py-2">Tag</th>
-            <th class="px-2 py-2">Fluid</th><th class="px-2 py-2 text-center">Flow</th>
-            <th class="px-2 py-2 text-center">Head</th><th class="px-2 py-2">Pump Type</th>
-            <th class="px-2 py-2">Category</th><th class="px-2 py-2">Action</th>
-        </tr></thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-        ${filtered.map(item=>{
-            const inLib=userReferenceLibraryData.some(r=>r.sourceId===item.id);
-            return `<tr class="hover:bg-gray-50">
-                <td class="px-2 py-2"><input type="checkbox" class="history-checkbox" data-id="${item.id}"></td>
-                <td class="px-2 py-2 text-center"><button class="add-to-library-btn text-lg ${inLib?'text-yellow-400 cursor-not-allowed':'text-gray-300 hover:text-yellow-400'}"
-                    data-id="${item.id}" ${inLib?'disabled':''}>${inLib?'★':'☆'}</button></td>
-                <td class="px-2 py-2 font-semibold">${item.pumpName||'N/A'}</td>
-                <td class="px-2 py-2 text-gray-600">${item.fluidName||'N/A'}</td>
-                <td class="px-2 py-2 text-center text-gray-600">${item.ratedFlowRate||'—'}</td>
-                <td class="px-2 py-2 text-center text-gray-600">${parseFloat(item.totalHead||0).toFixed(1)}</td>
-                <td class="px-2 py-2 text-blue-700 font-medium">${item.suggestion||'—'}</td>
-                <td class="px-2 py-2"><select class="form-select text-xs p-1 category-select-individual w-full" data-id="${item.id}">
-                    <option value="Uncategorized" ${!item.category||item.category==='Uncategorized'?'selected':''}>Uncategorized</option>
-                    ${categories.map(c=>`<option value="${c}" ${item.category===c?'selected':''}>${c}</option>`).join('')}
-                </select></td>
-                <td class="px-2 py-2"><button class="btn-3d btn-small-3d view-history-btn" data-id="${item.id}">View</button></td>
+    // Check if any item has vendor data for comparison mode
+    const hasVendorData = filtered.some(i => i._vendorPumpType);
+
+    // Match checker: does program type start with vendor type?
+    function matchStatus(vendor, program) {
+        if (!vendor || !program) return { icon:'—', cls:'color:#94a3b8', match:null };
+        const v = vendor.trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3);
+        const p = program.trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3);
+        if (!v || !p) return { icon:'—', cls:'color:#94a3b8', match:null };
+        const match = (v===p) || program.toUpperCase().startsWith(v) || vendor.toUpperCase().startsWith(p);
+        return match
+            ? { icon:'✅', cls:'color:#059669;font-weight:700;', match:true }
+            : { icon:'❌', cls:'color:#dc2626;font-weight:700;', match:false };
+    }
+
+    // Summary stats
+    let matchCount=0, mismatchCount=0, noVendorCount=0;
+    filtered.forEach(item => {
+        if (!item._vendorPumpType) { noVendorCount++; return; }
+        const m = matchStatus(item._vendorPumpType, item.finalSuggestedType||'');
+        if (m.match === true) matchCount++;
+        else if (m.match === false) mismatchCount++;
+    });
+    const withVendor = matchCount + mismatchCount;
+
+    const summaryBar = hasVendorData ? `
+    <div style="display:flex;align-items:center;gap:1rem;padding:0.6rem 1rem;background:white;border:1px solid #e2e8f0;border-radius:0.5rem;margin-bottom:0.75rem;font-size:0.8rem;flex-wrap:wrap;">
+        <span style="font-weight:700;color:#1e293b;">Comparison vs. Vendor:</span>
+        <span style="color:#059669;font-weight:700;">✅ Match: ${matchCount}</span>
+        <span style="color:#dc2626;font-weight:700;">❌ Mismatch: ${mismatchCount}</span>
+        ${withVendor>0?`<span style="color:#1d4ed8;font-weight:600;">Accuracy: ${Math.round(matchCount/withVendor*100)}%</span>`:''}
+        ${noVendorCount>0?`<span style="color:#94a3b8;">No vendor data: ${noVendorCount}</span>`:''}
+        <span style="color:#94a3b8;font-size:0.7rem;margin-left:auto;">Comparison is on pump type family (OH/BB/VS). Blind calculation — vendor columns not used.</span>
+    </div>` : '';
+
+    lc.innerHTML = summaryBar + `<div style="overflow-x:auto;">
+    <table style="min-width:100%;border-collapse:collapse;font-size:0.75rem;">
+        <thead>
+        <tr style="background:#1e293b;color:white;">
+            <th style="padding:6px 8px;font-weight:600;text-align:left;white-space:nowrap;">
+                <input type="checkbox" id="selectAllHistoryCheckboxHeader" style="accent-color:#f59e0b;">
+            </th>
+            <th style="padding:6px 4px;font-weight:600;">⭐</th>
+            <th style="padding:6px 8px;font-weight:600;text-align:left;">Tag</th>
+            <th style="padding:6px 8px;font-weight:600;text-align:left;">Fluid</th>
+            <th style="padding:6px 6px;font-weight:600;text-align:center;">T°C</th>
+            <th style="padding:6px 6px;font-weight:600;text-align:center;">Q m³/hr</th>
+            <th style="padding:6px 6px;font-weight:600;text-align:center;">H m</th>
+            ${hasVendorData?`
+            <th style="padding:6px 8px;font-weight:600;text-align:center;background:#1e40af;border-left:2px solid #f59e0b;">Vendor Type</th>
+            <th style="padding:6px 8px;font-weight:600;text-align:center;background:#065f46;border-left:1px solid #34d399;">Program Type</th>
+            <th style="padding:6px 8px;font-weight:600;text-align:center;">Match</th>
+            <th style="padding:6px 6px;font-weight:600;text-align:center;">Vendor Ns</th>
+            <th style="padding:6px 6px;font-weight:600;text-align:center;">Prog Ns</th>
+            ` : `
+            <th style="padding:6px 8px;font-weight:600;text-align:left;">Program Selection</th>
+            `}
+            <th style="padding:6px 8px;font-weight:600;text-align:left;">Category</th>
+            <th style="padding:6px 8px;font-weight:600;">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        ${filtered.map((item, idx) => {
+            const inLib = userReferenceLibraryData.some(r => r.sourceId === item.id);
+            const bg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+            const progType = item.finalSuggestedType || '—';
+            const vendorType = item._vendorPumpType || '';
+            const ms = matchStatus(vendorType, progType);
+            const progShort = progType !== '—'
+                ? `<span style="font-weight:700;color:#059669;">${item.finalSuggestedType}</span>
+                   <span style="color:#94a3b8;font-size:0.68rem;display:block;">${item.finalNumberOfStages?item.finalNumberOfStages+'stg':''} ${item.suctionConfig||''}</span>`
+                : '<span style="color:#94a3b8;">—</span>';
+
+            return `<tr style="background:${bg};border-bottom:1px solid #f1f5f9;" class="history-row">
+                <td style="padding:5px 8px;"><input type="checkbox" class="history-checkbox" data-id="${item.id}"></td>
+                <td style="padding:5px 4px;text-align:center;">
+                    <button class="add-to-library-btn" style="font-size:1rem;background:none;border:none;cursor:pointer;color:${inLib?'#f59e0b':'#cbd5e1'};"
+                        data-id="${item.id}" ${inLib?'disabled':''}>${inLib?'★':'☆'}</button>
+                </td>
+                <td style="padding:5px 8px;font-weight:600;color:#1e293b;white-space:nowrap;">${item.pumpName||'N/A'}</td>
+                <td style="padding:5px 8px;color:#475569;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${item.fluidName||''}">${item.fluidName||'N/A'}</td>
+                <td style="padding:5px 6px;text-align:center;color:#475569;">${item.temperature||'—'}</td>
+                <td style="padding:5px 6px;text-align:center;color:#475569;">${item.ratedFlowRate||'—'}</td>
+                <td style="padding:5px 6px;text-align:center;color:#475569;">${item.totalHead?parseFloat(item.totalHead).toFixed(0):'—'}</td>
+                ${hasVendorData ? `
+                <td style="padding:5px 8px;text-align:center;background:#eff6ff;border-left:2px solid #93c5fd;">
+                    <span style="font-weight:700;color:#1d4ed8;">${vendorType||'—'}</span>
+                    ${item._vendorStages?`<span style="color:#94a3b8;font-size:0.68rem;display:block;">${item._vendorStages}stg</span>`:''}
+                </td>
+                <td style="padding:5px 8px;text-align:center;background:#f0fdf4;border-left:1px solid #86efac;">${progShort}</td>
+                <td style="padding:5px 8px;text-align:center;font-size:1rem;">${ms.icon}</td>
+                <td style="padding:5px 6px;text-align:center;color:#64748b;">${item._vendorNs||'—'}</td>
+                <td style="padding:5px 6px;text-align:center;color:#1d4ed8;font-weight:600;">${item.finalNs||'—'}</td>
+                ` : `
+                <td style="padding:5px 8px;color:#1d4ed8;">${item.suggestion||'—'}</td>
+                `}
+                <td style="padding:5px 8px;">
+                    <select style="font-size:0.72rem;padding:2px 4px;border:1px solid #e2e8f0;border-radius:4px;width:100%;" class="category-select-individual" data-id="${item.id}">
+                        <option value="Uncategorized" ${!item.category||item.category==='Uncategorized'?'selected':''}>Uncategorized</option>
+                        ${categories.map(c=>`<option value="${c}" ${item.category===c?'selected':''}>${c}</option>`).join('')}
+                    </select>
+                </td>
+                <td style="padding:5px 8px;white-space:nowrap;">
+                    <button class="view-history-btn" data-id="${item.id}"
+                        style="font-size:0.7rem;padding:3px 8px;background:#1e3a8a;color:white;border:none;border-radius:4px;cursor:pointer;">View</button>
+                </td>
             </tr>`;
         }).join('')}
-        </tbody></table>`;
+        </tbody>
+    </table></div>`;
     const hcb=document.getElementById('selectAllHistoryCheckboxHeader');
     if(hcb) hcb.addEventListener('change',e=>document.querySelectorAll('#historyListContainer .history-checkbox')
         .forEach(cb=>cb.checked=e.target.checked));
@@ -2635,13 +2717,42 @@ function processWB(wb, catName, appendMode=false) {
             'ratedFlowRate','normalFlowRate','suctionPressure','dischargePressure',
             'npshAvailable','npshRequired','pumpSpeed']);
 
+        // ── BLIND INPUT KEYS — only process conditions, no vendor/output data ─────
+        // These are read from Excel but IGNORED for calculation (stored for comparison)
+        const blindKeys = new Set([
+            'finalSuggestedType','suggestion','finalNumberOfStages','suctionConfig',
+            'casingType','finalNs','finalNss','finalTipSpeed','finalImpellerDiameter',
+            'hydraulicPower','brakeHorsepower','motorRatedPower','estimatedEfficiency',
+            'correctedEfficiency','rankScore','status','npshEst','nozzleCheck',
+            'fullAnalysisForComparison','fullValidationLog','highTempWarning',
+            'viscoFactors','viscoCorrected','impellerChar','vs6Submergence',
+        ]);
+        // Excel column → internal key mappings that are OUTPUT (not input)
+        const blindHeaderPatterns = [
+            /^PUMP TYPE$/i, /^PUMPSUGGESTION$/i, /^REAL PUMP TYPE$/i,
+            /^NO\.? OF STAGE/i, /^STAGE$/i, /^Ns$/i, /^Nss$/i,
+            /^IMPELLER DIAMETER$/i, /^HYD POWER$/i, /^MOTOR RATING$/i,
+            /^CALCULATED EFF$/i, /^REAL rated/i, /^REAL eff/i,
+            /^Casing Type$/i, /^SealSuggestion$/i,
+        ];
+
         const t0 = Date.now();
         const items = json.map((row, i) => {
-            const item = { id:t0-i, isOilAndGas:true, category:catName, _customData:{} };
+            const item = { id:t0-i, isOilAndGas:true, category:catName, _customData:{}, _originalData:{} };
             let hasD = false;
+
             for (const hdr in row) {
+                // Check if this header is a blind (output) column
+                const isBlind = blindHeaderPatterns.some(p => p.test(hdr.trim()));
                 const ik = normMap[normalizeHeader(hdr)];
                 let val = row[hdr];
+
+                if (isBlind || blindKeys.has(ik)) {
+                    // Store original vendor selection for comparison — don't use for calc
+                    item._originalData[hdr] = val;
+                    continue;
+                }
+
                 if (ik) {
                     if (numK.has(ik)) { const p = parseFloat(val); val = isNaN(p) ? undefined : p; }
                     item[ik] = val;
@@ -2650,24 +2761,34 @@ function processWB(wb, catName, appendMode=false) {
                     item._customData[hdr] = val;
                 }
             }
+
             if (!item.designStandard) item.designStandard = 'API610';
             if (!hasD) return null;
 
-            // ── AUTO-CALCULATE on import ──────────────────────────────────
-            // Compute dP and head if suction/discharge pressures exist
+            // ── BLIND AUTO-CALCULATE — from process inputs only ───────────────
             if (item.suctionPressure !== undefined && item.dischargePressure !== undefined) {
                 const dP = item.dischargePressure - item.suctionPressure;
                 item.differentialPressure = +dP.toFixed(2);
                 if (item.density && item.density > 0)
                     item.totalHead = +((dP * 10.197) / (item.density / 1000)).toFixed(2);
             }
-            // Run full selection engine
+
+            // Extract original/vendor selections for comparison display
+            const origData = item._originalData;
+            item._vendorPumpType  = origData['Real PUMP TYPE'] || origData['PUMP TYPE'] || origData['PumpSuggestion'] || '';
+            item._vendorStages    = origData['NO OF STAGE']  || origData['NO. OF STAGE'] || origData['STAGE'] || '';
+            item._vendorNs        = origData['Ns']  || '';
+            item._vendorNss       = origData['Nss'] || '';
+            item._vendorMotor     = origData['MOTOR RATING'] || origData['REAL rated power'] || '';
+            item._vendorEff       = origData['CALCULATED EFF'] || origData['REAL eff.'] || '';
+
+            // Run full selection engine (blind)
             try {
                 const res = calculatePumpSelection(item);
                 if (!res.error && res.suggestion) {
                     Object.assign(item, res);
                 }
-            } catch(e) { /* skip calc errors silently */ }
+            } catch(e) { /* skip silently */ }
 
             return item;
         }).filter(Boolean);
