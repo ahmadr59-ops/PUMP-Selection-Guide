@@ -1360,12 +1360,18 @@ function calculatePumpSelection(inputData) {
     const isHighSolids     = ['medium','high'].includes(solidsContent);
 
     // 6. RULE ENGINE — فیلتر hard constraints (از ChatGPT Rule_Engine.txt)
-    // isOilAndGas: explicit boolean — handles all formats
-    // Default: true (conservative — safer to exclude OH1/BB4 than include them)
-    const isOilAndGasBool = (isOilAndGas === undefined || isOilAndGas === null)
-        ? true  // default to O&G exclusion when not specified
-        : (isOilAndGas === true || isOilAndGas === 'true' ||
-           isOilAndGas === 'TRUE' || isOilAndGas === 1 || isOilAndGas === '1');
+    // BUG FIX v3.1: robust isOilAndGas parser — Excel import delivers mixed types
+    // (boolean true/false, string 'TRUE'/'YES'/'1'/'true', number 1/0)
+    // Default: true = O&G (conservative — excludes OH1 & BB4 per API 610 Table 3)
+    function parseIsOilAndGas(val) {
+        if (val === undefined || val === null) return true;
+        if (typeof val === 'boolean') return val;
+        if (typeof val === 'number')  return val !== 0;
+        const s = String(val).trim().toUpperCase();
+        if (['FALSE','0','NO','N','F','OFF'].includes(s)) return false;
+        return true; // TRUE/YES/Y/T/ON/unknown → conservative O&G default
+    }
+    const isOilAndGasBool = parseIsOilAndGas(isOilAndGas);
 
     const inputNorm = {
         differentialPressureBar: Math.max(0, calc.differentialPressure || 0),
@@ -2570,9 +2576,17 @@ function handleBatchCalculation() {
     ids.forEach(id=>{
         const idx=selectionHistory.findIndex(i=>i.id===id); if(idx===-1) return;
         const item = selectionHistory[idx];
-        // Ensure isOilAndGas is boolean before sending to engine
-        if (item.isOilAndGas === undefined || item.isOilAndGas === null)
-            item.isOilAndGas = true;
+        // BUG FIX v3.1: normalize isOilAndGas to boolean before engine call
+        // Handles mixed types from Excel import (string, number, boolean)
+        {
+            const v = item.isOilAndGas;
+            if (v === undefined || v === null) {
+                item.isOilAndGas = true;
+            } else if (typeof v !== 'boolean') {
+                const s = String(v).trim().toUpperCase();
+                item.isOilAndGas = !(['FALSE','0','NO','N','F','OFF'].includes(s));
+            }
+        }
         const res=calculatePumpSelection(item);
         if(res.error){failed++;return;} Object.assign(selectionHistory[idx],res); done++;
     });
@@ -2757,7 +2771,8 @@ function processWB(wb, catName, appendMode=false) {
                 const ogStr = String(ogRaw).trim().toUpperCase();
                 rowIsOG = !(ogStr === 'FALSE' || ogStr === '0' || ogStr === 'NO' || ogStr === 'F');
             }
-            const item = { id:t0-i, isOilAndGas:rowIsOG, category:catName, _customData:{}, _originalData:{} };
+            // BUG FIX v3.1: ensure rowIsOG is strictly boolean (not string/number)
+            const item = { id:t0-i, isOilAndGas:Boolean(rowIsOG), category:catName, _customData:{}, _originalData:{} };
             let hasD = false;
 
             for (const hdr in row) {
@@ -2820,10 +2835,16 @@ function processWB(wb, catName, appendMode=false) {
             item._vendorEff       = origData['CALCULATED EFF'] || origData['REAL eff.'] || '';
 
             // Run full selection engine (blind)
+            // BUG FIX v3.1: preserve isOilAndGas BEFORE Object.assign
+            // calculatePumpSelection result doesn't contain isOilAndGas,
+            // but Object.assign could theoretically overwrite it if future
+            // changes add it. Explicitly restore after assign.
+            const savedIsOilAndGas = item.isOilAndGas;
             try {
                 const res = calculatePumpSelection(item);
                 if (!res.error && res.suggestion) {
                     Object.assign(item, res);
+                    item.isOilAndGas = savedIsOilAndGas; // restore after assign
                 }
             } catch(e) { /* skip silently */ }
 
