@@ -1033,8 +1033,9 @@ const SELECTION_RULES = [
     {
         id: 'OIL_GAS_EXCLUSION', type: 'hard_constraint',
         evaluate(input, candidate, type) {
-            if (input.isOilAndGas && !input.isCriticalNPSH && ['OH1','BB4'].includes(type))
-                return { passed:false, reason:`${type} excluded for O&G/Refinery (API 610 Table 3)` };
+            // Only exclude when isOilAndGas is explicitly true AND not critical NPSH
+            if (input.isOilAndGas === true && input.isCriticalNPSH !== true && ['OH1','BB4'].includes(type))
+                return { passed:false, reason:`${type} excluded for O&G/Refinery services (API 610 Table 3)` };
             return { passed:true };
         }
     },
@@ -1359,13 +1360,17 @@ function calculatePumpSelection(inputData) {
     const isHighSolids     = ['medium','high'].includes(solidsContent);
 
     // 6. RULE ENGINE — فیلتر hard constraints (از ChatGPT Rule_Engine.txt)
+    // isOilAndGas: explicit boolean — handles string "TRUE"/"FALSE" from Excel
+    const isOilAndGasBool = (isOilAndGas === true || isOilAndGas === 'true' ||
+                              isOilAndGas === 'TRUE' || isOilAndGas === 1 || isOilAndGas === '1');
+
     const inputNorm = {
-        differentialPressureBar: calc.differentialPressure,
-        temperatureC:  temperature,
-        viscosityCp:   viscosity,
-        flowM3Hr:      flowForCalc,
-        npshAvailableM:npshAvailable,
-        isOilAndGas:   !!isOilAndGas,
+        differentialPressureBar: Math.max(0, calc.differentialPressure || 0),
+        temperatureC:   temperature,
+        viscosityCp:    viscosity,
+        flowM3Hr:       flowForCalc,
+        npshAvailableM: npshAvailable,
+        isOilAndGas:    isOilAndGasBool,
         isCriticalNPSH,
     };
     const allCandidates   = Object.entries(pumpTypeData);
@@ -2738,7 +2743,14 @@ function processWB(wb, catName, appendMode=false) {
 
         const t0 = Date.now();
         const items = json.map((row, i) => {
-            const item = { id:t0-i, isOilAndGas:true, category:catName, _customData:{}, _originalData:{} };
+            // Parse IsOilAndGas from Excel — default true for O&G
+            let rowIsOG = true;
+            const ogRaw = row['IsOilAndGas'] ?? row['isOilAndGas'] ?? row['IS OIL GAS'] ?? '';
+            if (ogRaw !== '') {
+                const ogStr = String(ogRaw).trim().toUpperCase();
+                rowIsOG = !(ogStr === 'FALSE' || ogStr === '0' || ogStr === 'NO' || ogStr === 'F');
+            }
+            const item = { id:t0-i, isOilAndGas:rowIsOG, category:catName, _customData:{}, _originalData:{} };
             let hasD = false;
 
             for (const hdr in row) {
@@ -2766,11 +2778,23 @@ function processWB(wb, catName, appendMode=false) {
             if (!hasD) return null;
 
             // ── BLIND AUTO-CALCULATE — from process inputs only ───────────────
-            if (item.suctionPressure !== undefined && item.dischargePressure !== undefined) {
+            if (item.suctionPressure !== undefined && item.dischargePressure !== undefined &&
+                item.dischargePressure > item.suctionPressure) {
                 const dP = item.dischargePressure - item.suctionPressure;
                 item.differentialPressure = +dP.toFixed(2);
                 if (item.density && item.density > 0)
                     item.totalHead = +((dP * 10.197) / (item.density / 1000)).toFixed(2);
+            }
+            // If totalHead still missing but available from Excel (pre-computed) — use it
+            if ((!item.totalHead || item.totalHead <= 0) && item._originalData) {
+                const ogH = parseFloat(item._originalData['TotalHead'] || item._originalData['DIFFERENTIAL HEAD'] || 0);
+                if (ogH > 0 && item.density > 0 && !item.differentialPressure) {
+                    item.totalHead = ogH;
+                    // Back-calculate dP from head
+                    item.differentialPressure = +(ogH * (item.density / 1000) / 10.197).toFixed(2);
+                    item.suctionPressure  = item.suctionPressure  || 0;
+                    item.dischargePressure = +(item.suctionPressure + item.differentialPressure).toFixed(2);
+                }
             }
 
             // Extract original/vendor selections for comparison display
