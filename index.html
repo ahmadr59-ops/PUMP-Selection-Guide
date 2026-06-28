@@ -1360,9 +1360,12 @@ function calculatePumpSelection(inputData) {
     const isHighSolids     = ['medium','high'].includes(solidsContent);
 
     // 6. RULE ENGINE — فیلتر hard constraints (از ChatGPT Rule_Engine.txt)
-    // isOilAndGas: explicit boolean — handles string "TRUE"/"FALSE" from Excel
-    const isOilAndGasBool = (isOilAndGas === true || isOilAndGas === 'true' ||
-                              isOilAndGas === 'TRUE' || isOilAndGas === 1 || isOilAndGas === '1');
+    // isOilAndGas: explicit boolean — handles all formats
+    // Default: true (conservative — safer to exclude OH1/BB4 than include them)
+    const isOilAndGasBool = (isOilAndGas === undefined || isOilAndGas === null)
+        ? true  // default to O&G exclusion when not specified
+        : (isOilAndGas === true || isOilAndGas === 'true' ||
+           isOilAndGas === 'TRUE' || isOilAndGas === 1 || isOilAndGas === '1');
 
     const inputNorm = {
         differentialPressureBar: Math.max(0, calc.differentialPressure || 0),
@@ -2566,7 +2569,11 @@ function handleBatchCalculation() {
     let done=0,failed=0;
     ids.forEach(id=>{
         const idx=selectionHistory.findIndex(i=>i.id===id); if(idx===-1) return;
-        const res=calculatePumpSelection(selectionHistory[idx]);
+        const item = selectionHistory[idx];
+        // Ensure isOilAndGas is boolean before sending to engine
+        if (item.isOilAndGas === undefined || item.isOilAndGas === null)
+            item.isOilAndGas = true;
+        const res=calculatePumpSelection(item);
         if(res.error){failed++;return;} Object.assign(selectionHistory[idx],res); done++;
     });
     safeSetLocalStorage(PUMP_HISTORY_KEY,JSON.stringify(selectionHistory));
@@ -2758,6 +2765,12 @@ function processWB(wb, catName, appendMode=false) {
                 const isBlind = blindHeaderPatterns.some(p => p.test(hdr.trim()));
                 const ik = normMap[normalizeHeader(hdr)];
                 let val = row[hdr];
+
+                // CRITICAL: isOilAndGas already set from rowIsOG — do not overwrite
+                if (ik === 'isOilAndGas') {
+                    item._originalData[hdr] = val; // keep for reference
+                    continue;
+                }
 
                 if (isBlind || blindKeys.has(ik)) {
                     // Store original vendor selection for comparison — don't use for calc
