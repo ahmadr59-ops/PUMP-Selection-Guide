@@ -2317,17 +2317,18 @@ function renderHistoryList() {
     const bs =document.getElementById('bulkCategorySelect');
     if(!nav||!lc||!bs) return;
 
-    const allCats=['All','Uncategorized',...categories];
-    nav.innerHTML=allCats.map(cat=>{
-        const isC=cat!=='All'&&cat!=='Uncategorized';
-        return `<div class="group relative history-category-tab ${activeHistoryCategory===cat?'active':''}" data-category="${cat}" style="cursor:pointer">
-            <span>${cat}</span>
-            ${isC?`<div class="category-tab-actions hidden group-hover:flex absolute top-0 right-0 -mr-2 -mt-2 gap-1">
-                <button class="edit-category-btn text-xs bg-yellow-400 hover:bg-yellow-500 rounded-full p-1 leading-none">✏</button>
-                <button class="delete-category-btn text-xs bg-red-400 hover:bg-red-500 rounded-full p-1 leading-none">✕</button>
-            </div>`:''}
-        </div>`;
-    }).join('')+`<button id="new-category-btn" class="history-category-tab">+ New</button>`;
+    const allCats = ['All', 'Uncategorized', ...categories];
+    nav.innerHTML = allCats.map(cat => {
+        const isC = cat !== 'All' && cat !== 'Uncategorized';
+        const isActive = activeHistoryCategory === cat;
+        const editBtn = isC ? `<button class="edit-category-btn" data-category="${cat}" title="Rename" style="padding:3px 5px;font-size:0.68rem;background:#fef9c3;border:1px solid #fde68a;border-left:none;color:#92400e;cursor:pointer;">✏</button>` : '';
+        const delBtn  = isC ? `<button class="delete-category-btn" data-category="${cat}" title="Delete" style="padding:3px 5px;font-size:0.68rem;background:#fee2e2;border:1px solid #fecaca;border-left:none;border-radius:0 6px 6px 0;color:#dc2626;cursor:pointer;">✕</button>` : '';
+        return `<span style="display:inline-flex;align-items:stretch;margin-right:4px;margin-bottom:4px;">
+            <button class="history-category-tab ${isActive?'active':''}" data-category="${cat}"
+                style="border-radius:${isC?'6px 0 0 6px':'8px'};margin:0;">${cat}</button>
+            ${editBtn}${delBtn}
+        </span>`;
+    }).join('') + `<button id="new-category-btn" class="history-category-tab" style="background:#f0fdf4;border-color:#86efac;color:#166534;">+ New</button>`;
 
     bs.innerHTML=`<option value="">Move to…</option>`+['Uncategorized',...categories]
         .map(c=>`<option value="${c}">${c}</option>`).join('');
@@ -2523,15 +2524,91 @@ function loadProjectState(state) {
 function normalizeHeader(h){return h.trim().toUpperCase().replace(/[\s_\-\.]+/g,'');}
 
 function handleFileSelect(e) {
-    const file=e.target.files[0]; if(!file) return;
-    if(importTarget==='history') {
-        showInputModal('Import Category','Name for this import batch:',catName=>{
-            if(!catName){showNotification('Import cancelled.','error');return;}
-            if(categories.includes(catName)){showNotification('Category name exists.','error');return;}
-            readWB(file,wb=>processWB(wb,catName));
-        },`Import_${file.name.replace(/\.[^/.]+$/,'')}`);
-    } else { readWB(file,wb=>processWB(wb,null)); }
-    e.target.value='';
+    const file = e.target.files[0]; if (!file) return;
+    if (importTarget === 'history') {
+        showImportDialog(file);
+    } else {
+        readWB(file, wb => processWB(wb, null));
+    }
+    e.target.value = '';
+}
+
+// ── Import dialog: choose new category OR append to existing ─────────────────
+function showImportDialog(file) {
+    const defaultName = `Import_${file.name.replace(/\.[^/.]+$/, '')}`;
+    const existingOpts = categories.map(c =>
+        `<option value="${c}">${c}</option>`).join('');
+
+    const m = document.getElementById('customModal');
+    document.getElementById('modalTitle').textContent = 'Import Excel — Category';
+    document.getElementById('modalBody').innerHTML = `
+        <div style="text-align:left;font-size:0.875rem;color:#374151;">
+            <p style="margin-bottom:1rem;color:#6b7280;">
+                File: <strong>${file.name}</strong>
+            </p>
+
+            <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                <!-- Option A: New category -->
+                <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer;padding:0.75rem;border:1.5px solid #e2e8f0;border-radius:0.5rem;background:#f8fafc;" id="optNewLabel">
+                    <input type="radio" name="importMode" value="new" checked id="importModeNew"
+                        style="margin-top:3px;accent-color:#1d4ed8;">
+                    <div>
+                        <div style="font-weight:600;color:#1e293b;">Create new category</div>
+                        <input type="text" id="newCatInput" class="field-input"
+                            style="margin-top:0.4rem;font-size:0.8rem;"
+                            value="${defaultName}" placeholder="Category name">
+                    </div>
+                </label>
+
+                <!-- Option B: Append to existing -->
+                <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer;padding:0.75rem;border:1.5px solid #e2e8f0;border-radius:0.5rem;background:#f8fafc;${categories.length===0?'opacity:0.4;pointer-events:none;':''}" id="optAppendLabel">
+                    <input type="radio" name="importMode" value="append" id="importModeAppend"
+                        style="margin-top:3px;accent-color:#1d4ed8;"
+                        ${categories.length===0?'disabled':''}>
+                    <div>
+                        <div style="font-weight:600;color:#1e293b;">Append to existing category</div>
+                        <select id="appendCatSelect" class="field-select"
+                            style="margin-top:0.4rem;font-size:0.8rem;">
+                            ${existingOpts || '<option value="">No categories yet</option>'}
+                        </select>
+                    </div>
+                </label>
+            </div>
+        </div>`;
+
+    document.getElementById('modalFooter').innerHTML = `
+        <button id="importConfirmBtn" style="background:#1e3a8a;color:white;border:none;border-radius:0.4rem;padding:0.5rem 1.25rem;font-weight:700;cursor:pointer;">Import</button>
+        <button id="importCancelBtn" style="background:#f1f5f9;color:#374151;border:1px solid #e2e8f0;border-radius:0.4rem;padding:0.5rem 1rem;font-weight:600;cursor:pointer;margin-left:0.5rem;">Cancel</button>`;
+
+    m.classList.remove('hidden');
+
+    // Highlight selected radio option
+    document.querySelectorAll('input[name="importMode"]').forEach(r => {
+        r.addEventListener('change', () => {
+            document.getElementById('optNewLabel').style.borderColor    = r.value==='new'    ? '#3b82f6' : '#e2e8f0';
+            document.getElementById('optAppendLabel').style.borderColor = r.value==='append' ? '#3b82f6' : '#e2e8f0';
+        });
+    });
+    document.getElementById('optNewLabel').style.borderColor = '#3b82f6'; // default
+
+    document.getElementById('importConfirmBtn').onclick = () => {
+        const mode = document.querySelector('input[name="importMode"]:checked').value;
+        let catName;
+        if (mode === 'new') {
+            catName = (document.getElementById('newCatInput').value || '').trim();
+            if (!catName) { showNotification('Enter a category name.', 'error'); return; }
+            if (categories.includes(catName)) {
+                showNotification(`Category "${catName}" already exists. Choose "Append" to add to it.`, 'error');
+                return;
+            }
+        } else {
+            catName = document.getElementById('appendCatSelect').value;
+            if (!catName) { showNotification('Select a category to append to.', 'error'); return; }
+        }
+        m.classList.add('hidden');
+        readWB(file, wb => processWB(wb, catName, mode === 'append'));
+    };
+    document.getElementById('importCancelBtn').onclick = () => m.classList.add('hidden');
 }
 
 function readWB(file,cb) {
@@ -2541,32 +2618,78 @@ function readWB(file,cb) {
     r.readAsArrayBuffer(file);
 }
 
-function processWB(wb,catName) {
-    const json=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{raw:false});
-    if(importTarget==='history'&&catName) {
-        if(!categories.includes(catName)){categories.push(catName);safeSetLocalStorage(PUMP_CATEGORIES_KEY,JSON.stringify(categories));}
-        const normMap={};
-        for(const ik in INTERNAL_KEY_MAP) INTERNAL_KEY_MAP[ik].forEach(a=>{normMap[normalizeHeader(a)]=ik;});
-        const numK=new Set(['temperature','density','viscosity','vaporPressure','ratedFlowRate','normalFlowRate',
-            'suctionPressure','dischargePressure','npshAvailable','npshRequired','pumpSpeed']);
-        const t0=Date.now();
-        const items=json.map((row,i)=>{
-            const item={id:t0-i,isOilAndGas:true,category:catName,_customData:{}};let hasD=false;
-            for(const hdr in row){
-                const ik=normMap[normalizeHeader(hdr)];let val=row[hdr];
-                if(ik){if(numK.has(ik)){const p=parseFloat(val);val=isNaN(p)?undefined:p;}
-                    item[ik]=val;if(val!==null&&val!==undefined&&val!=='')hasD=true;}
-                else if(hdr.trim()&&!hdr.startsWith('__EMPTY')) item._customData[hdr]=val;
+function processWB(wb, catName, appendMode=false) {
+    const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {raw:false});
+    if (importTarget === 'history' && catName) {
+        // Add category if new
+        if (!categories.includes(catName)) {
+            categories.push(catName);
+            safeSetLocalStorage(PUMP_CATEGORIES_KEY, JSON.stringify(categories));
+        }
+
+        const normMap = {};
+        for (const ik in INTERNAL_KEY_MAP)
+            INTERNAL_KEY_MAP[ik].forEach(a => { normMap[normalizeHeader(a)] = ik; });
+
+        const numK = new Set(['temperature','density','viscosity','vaporPressure',
+            'ratedFlowRate','normalFlowRate','suctionPressure','dischargePressure',
+            'npshAvailable','npshRequired','pumpSpeed']);
+
+        const t0 = Date.now();
+        const items = json.map((row, i) => {
+            const item = { id:t0-i, isOilAndGas:true, category:catName, _customData:{} };
+            let hasD = false;
+            for (const hdr in row) {
+                const ik = normMap[normalizeHeader(hdr)];
+                let val = row[hdr];
+                if (ik) {
+                    if (numK.has(ik)) { const p = parseFloat(val); val = isNaN(p) ? undefined : p; }
+                    item[ik] = val;
+                    if (val !== null && val !== undefined && val !== '') hasD = true;
+                } else if (hdr.trim() && !hdr.startsWith('__EMPTY')) {
+                    item._customData[hdr] = val;
+                }
             }
-            if(!item.designStandard) item.designStandard='API610';
-            return hasD?item:null;
+            if (!item.designStandard) item.designStandard = 'API610';
+            if (!hasD) return null;
+
+            // ── AUTO-CALCULATE on import ──────────────────────────────────
+            // Compute dP and head if suction/discharge pressures exist
+            if (item.suctionPressure !== undefined && item.dischargePressure !== undefined) {
+                const dP = item.dischargePressure - item.suctionPressure;
+                item.differentialPressure = +dP.toFixed(2);
+                if (item.density && item.density > 0)
+                    item.totalHead = +((dP * 10.197) / (item.density / 1000)).toFixed(2);
+            }
+            // Run full selection engine
+            try {
+                const res = calculatePumpSelection(item);
+                if (!res.error && res.suggestion) {
+                    Object.assign(item, res);
+                }
+            } catch(e) { /* skip calc errors silently */ }
+
+            return item;
         }).filter(Boolean);
-        if(items.length>0){
-            selectionHistory=[...items,...selectionHistory];
-            safeSetLocalStorage(PUMP_HISTORY_KEY,JSON.stringify(selectionHistory));
-            activeHistoryCategory=catName; openTab('historyTab');
-            showNotification(`Imported ${items.length} items into "${catName}".`,'success');
-        } else showNotification('No data found. Check column headers.','error');
+
+        if (items.length > 0) {
+            // Append mode: add to existing items, don't prepend
+            if (appendMode) {
+                selectionHistory = [...selectionHistory, ...items];
+            } else {
+                selectionHistory = [...items, ...selectionHistory];
+            }
+            safeSetLocalStorage(PUMP_HISTORY_KEY, JSON.stringify(selectionHistory));
+            activeHistoryCategory = catName;
+            openTab('historyTab');
+            const calcCount = items.filter(i => i.suggestion && !i.suggestion.includes('Failed')).length;
+            showNotification(
+                `${appendMode?'Appended':'Imported'} ${items.length} items into "${catName}". ${calcCount} calculated.`,
+                'success'
+            );
+        } else {
+            showNotification('No data found. Check column headers match the template.', 'error');
+        }
     } else if(importTarget==='reference') {
         const t0=Date.now();
         const items=json.map((row,i)=>{
@@ -2758,11 +2881,14 @@ function initializeApp() {
     });
 
     // Category tabs
-    document.getElementById('historyCategoryTabsContainer')?.addEventListener('click',e=>{
-        const ed=e.target.closest('.edit-category-btn'), dl=e.target.closest('.delete-category-btn'), tb=e.target.closest('[data-category]');
-        if(ed) handleEditCategory(ed.closest('[data-category]').dataset.category);
-        else if(dl) handleDeleteCategory(dl.closest('[data-category]').dataset.category);
-        else if(tb&&tb.id!=='new-category-btn'){activeHistoryCategory=tb.dataset.category;renderHistoryList();}
+    document.getElementById('historyCategoryTabsContainer')?.addEventListener('click', e => {
+        const ed = e.target.closest('.edit-category-btn');
+        const dl = e.target.closest('.delete-category-btn');
+        const tb = e.target.closest('.history-category-tab');
+        if (ed) { e.stopPropagation(); handleEditCategory(ed.dataset.category); }
+        else if (dl) { e.stopPropagation(); handleDeleteCategory(dl.dataset.category); }
+        else if (e.target.id === 'new-category-btn') { handleAddNewCategory(); }
+        else if (tb && tb.dataset.category) { activeHistoryCategory = tb.dataset.category; renderHistoryList(); }
     });
 
     // History list events
