@@ -1033,8 +1033,10 @@ const SELECTION_RULES = [
     {
         id: 'OIL_GAS_EXCLUSION', type: 'hard_constraint',
         evaluate(input, candidate, type) {
-            // Only exclude when isOilAndGas is explicitly true AND not critical NPSH
-            if (input.isOilAndGas === true && input.isCriticalNPSH !== true && ['OH1','BB4'].includes(type))
+            // ROOT FIX: O&G exclusion is UNCONDITIONAL when isOilAndGas===true
+            // No NPSH exception — API 610 Table 3 exclusion applies regardless
+            // isOilAndGas is guaranteed boolean by parseIsOilAndGas() upstream
+            if (input.isOilAndGas === true && ['OH1','BB4'].includes(type))
                 return { passed:false, reason:`${type} excluded for O&G/Refinery services (API 610 Table 3)` };
             return { passed:true };
         }
@@ -1299,6 +1301,21 @@ function checkNozzleVelocity(flowM3hr) {
 // =============================================================================
 // ── MAIN SELECTION ENGINE ────────────────────────────────────────────────────
 // =============================================================================
+// =============================================================================
+// ── PARSE isOilAndGas — module-level, used by all callers ────────────────────
+// Accepts: boolean | 'true'|'TRUE'|'YES'|'Y'|'1'|'on' → true
+//          'false'|'FALSE'|'NO'|'N'|'0'|'off'         → false
+//          undefined | null                             → true (conservative)
+// =============================================================================
+function parseIsOilAndGas(val) {
+    if (val === undefined || val === null) return true;   // default: O&G
+    if (typeof val === 'boolean') return val;
+    if (typeof val === 'number')  return val !== 0;
+    const s = String(val).trim().toUpperCase();
+    if (['FALSE','0','NO','N','F','OFF'].includes(s)) return false;
+    return true;  // TRUE/YES/Y/T/ON/unknown → conservative O&G default
+}
+
 function calculatePumpSelection(inputData) {
 
     // 1. Validate inputs
@@ -1359,18 +1376,8 @@ function calculatePumpSelection(inputData) {
     const isHighTemp       = temperature >= 200;
     const isHighSolids     = ['medium','high'].includes(solidsContent);
 
-    // 6. RULE ENGINE — فیلتر hard constraints (از ChatGPT Rule_Engine.txt)
-    // BUG FIX v3.1: robust isOilAndGas parser — Excel import delivers mixed types
-    // (boolean true/false, string 'TRUE'/'YES'/'1'/'true', number 1/0)
-    // Default: true = O&G (conservative — excludes OH1 & BB4 per API 610 Table 3)
-    function parseIsOilAndGas(val) {
-        if (val === undefined || val === null) return true;
-        if (typeof val === 'boolean') return val;
-        if (typeof val === 'number')  return val !== 0;
-        const s = String(val).trim().toUpperCase();
-        if (['FALSE','0','NO','N','F','OFF'].includes(s)) return false;
-        return true; // TRUE/YES/Y/T/ON/unknown → conservative O&G default
-    }
+    // 6. RULE ENGINE — فیلتر hard constraints
+    // parseIsOilAndGas is defined at module level — use it directly
     const isOilAndGasBool = parseIsOilAndGas(isOilAndGas);
 
     const inputNorm = {
@@ -1650,6 +1657,9 @@ function calculatePumpSelection(inputData) {
 function handleSuggestion() {
     const form   = document.getElementById('pumpForm');
     const values = getFormValues(form);
+    // ROOT FIX: force isOilAndGas to strict boolean directly from checkbox DOM
+    // getFormValues already does this but be explicit to prevent any stale value
+    values.isOilAndGas = document.getElementById('isOilAndGas')?.checked === true;
     const result = calculatePumpSelection(values);
     if (result.error) { showNotification(`Calculation Error: ${result.error}`, 'error'); return; }
 
@@ -2524,7 +2534,7 @@ function getFormValues(form) {
     ['temperature','density','viscosity','vaporPressure','ratedFlowRate','normalFlowRate',
      'suctionPressure','dischargePressure','npshAvailable','npshRequired','pumpSpeed','estimatedEfficiency']
         .forEach(id=>{const el=form.elements[id];if(!el)return;const p=parseFloat(el.value);v[id]=(el.value!==''&&!isNaN(p))?p:undefined;});
-    if(form.elements['isOilAndGas']) v.isOilAndGas=form.elements['isOilAndGas'].checked;
+    if(form.elements['isOilAndGas']) v.isOilAndGas = Boolean(form.elements['isOilAndGas'].checked);
     return v;
 }
 function getFormData(){return getFormValues(document.getElementById('pumpForm'));}
@@ -2568,7 +2578,9 @@ function saveCurrentStateToHistory() {
     const fd=getFormData();
     if(!fd.projectName&&!fd.pumpName){showNotification('Enter a Project Name or Pump Tag first.','error');return false;}
     const toSave={...fd};
+    const savedOG = Boolean(fd.isOilAndGas); // ROOT FIX 5: snapshot before assign
     if(currentCalculationResult) Object.assign(toSave,currentCalculationResult);
+    toSave.isOilAndGas = savedOG; // restore — engine result must not overwrite user choice
     const idx=selectionHistory.findIndex(i=>i.id===currentHistoryId);
     if(currentHistoryId&&idx!==-1){
         selectionHistory[idx]={...selectionHistory[idx],...toSave};
@@ -2961,6 +2973,10 @@ function openTab(tabId) {
     if(tabId==='apiChartTab'||tabId==='chartTab') setTimeout(()=>redrawCharts(tabId),150);
     else if(tabId==='historyTab')          renderHistoryList();
     else if(tabId==='referenceLibraryTab') renderReferenceLibrary();
+    // ROOT FIX 7: always refresh calculated fields when data entry tab becomes visible
+    else if(tabId==='dataEntryTab') {
+        requestAnimationFrame(()=>updateCalculatedFields(document.getElementById('pumpForm')));
+    }
 }
 
 function showNotification(msg,type='success') {
@@ -3023,6 +3039,14 @@ function initializeApp() {
     }
 
     populatePumpList();renderReferenceLibrary();renderCalculationSettings();resetForm(false);
+    // ROOT FIX 6: explicitly activate dataEntryTab so all sub-renders run
+    // and force a layout pass so calculated fields paint immediately
+    openTab('dataEntryTab');
+    requestAnimationFrame(() => {
+        updateCalculatedFields(document.getElementById('pumpForm'));
+        // Ensure the active tab button styling is correct
+        document.getElementById('dataEntryTabButton')?.classList.add('active');
+    });
 
     // Tab buttons
     document.querySelectorAll('.tab-btn,.tab-button').forEach(btn=>btn.addEventListener('click',()=>openTab(btn.dataset.tab)));
