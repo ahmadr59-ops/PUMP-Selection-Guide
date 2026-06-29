@@ -2413,6 +2413,7 @@ function renderHistoryList() {
             ` : `
             <th style="padding:6px 8px;font-weight:600;text-align:left;">Program Selection</th>
             `}
+            <th style="padding:6px 6px;font-weight:600;text-align:center;background:#1e3a5f;white-space:nowrap;" title="Oil & Gas / Refinery — toggles OH1 & BB4 exclusion per API 610 Table 3">🛢 O&G</th>
             <th style="padding:6px 8px;font-weight:600;text-align:left;">Category</th>
             <th style="padding:6px 8px;font-weight:600;">Action</th>
         </tr>
@@ -2452,6 +2453,18 @@ function renderHistoryList() {
                 ` : `
                 <td style="padding:5px 8px;color:#1d4ed8;">${item.suggestion||'—'}</td>
                 `}
+                <td style="padding:5px 6px;text-align:center;">
+                    <label title="${item.isOilAndGas!==false?'O&G mode ON — OH1 & BB4 excluded':'General mode — all types considered'}"
+                        style="display:inline-flex;flex-direction:column;align-items:center;cursor:pointer;gap:1px;">
+                        <input type="checkbox" class="og-toggle-checkbox" data-id="${item.id}"
+                            ${item.isOilAndGas!==false?'checked':''}
+                            style="width:15px;height:15px;accent-color:#1d4ed8;cursor:pointer;">
+                        <span style="font-size:0.6rem;font-weight:700;
+                            color:${item.isOilAndGas!==false?'#1d4ed8':'#94a3b8'};">
+                            ${item.isOilAndGas!==false?'ON':'OFF'}
+                        </span>
+                    </label>
+                </td>
                 <td style="padding:5px 8px;">
                     <select style="font-size:0.72rem;padding:2px 4px;border:1px solid #e2e8f0;border-radius:4px;width:100%;" class="category-select-individual" data-id="${item.id}">
                         <option value="Uncategorized" ${!item.category||item.category==='Uncategorized'?'selected':''}>Uncategorized</option>
@@ -2588,7 +2601,11 @@ function handleBatchCalculation() {
             }
         }
         const res=calculatePumpSelection(item);
-        if(res.error){failed++;return;} Object.assign(selectionHistory[idx],res); done++;
+        if(res.error){failed++;return;}
+        const ogBeforeBatch = selectionHistory[idx].isOilAndGas; // preserve before assign
+        Object.assign(selectionHistory[idx],res);
+        selectionHistory[idx].isOilAndGas = ogBeforeBatch;       // restore after assign
+        done++;
     });
     safeSetLocalStorage(PUMP_HISTORY_KEY,JSON.stringify(selectionHistory));
     renderHistoryList();
@@ -2647,17 +2664,46 @@ function showImportDialog(file) {
     const existingOpts = categories.map(c =>
         `<option value="${c}">${c}</option>`).join('');
 
+    // Read current checkbox state from main form as default
+    const mainFormOG = document.getElementById('isOilAndGas')?.checked !== false;
+
     const m = document.getElementById('customModal');
-    document.getElementById('modalTitle').textContent = 'Import Excel — Category';
+    document.getElementById('modalTitle').textContent = 'Import Excel — Settings';
     document.getElementById('modalBody').innerHTML = `
         <div style="text-align:left;font-size:0.875rem;color:#374151;">
-            <p style="margin-bottom:1rem;color:#6b7280;">
+            <p style="margin-bottom:0.75rem;color:#6b7280;">
                 File: <strong>${file.name}</strong>
             </p>
 
+            <!-- ── Oil & Gas Toggle ── -->
+            <div style="background:#eff6ff;border:1.5px solid #93c5fd;border-radius:0.5rem;padding:0.75rem 1rem;margin-bottom:0.9rem;">
+                <div style="font-size:0.72rem;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">
+                    🛢 Calculation Mode — API 610 Table 3
+                </div>
+                <label style="display:flex;align-items:center;gap:0.6rem;cursor:pointer;">
+                    <input type="checkbox" id="importIsOilAndGas"
+                        style="width:18px;height:18px;accent-color:#1d4ed8;cursor:pointer;"
+                        ${mainFormOG ? 'checked' : ''}>
+                    <div>
+                        <span style="font-weight:600;color:#1e293b;font-size:0.85rem;">Oil &amp; Gas / Refinery Service</span>
+                        <div style="font-size:0.72rem;color:#64748b;margin-top:1px;">
+                            ✓ Checked → <strong>Excludes OH1 &amp; BB4</strong> per API 610 Table 3
+                            &nbsp;|&nbsp; Unchecked → All pump types considered
+                        </div>
+                    </div>
+                </label>
+                <div id="ogToggleStatus" style="margin-top:0.5rem;font-size:0.72rem;padding:4px 8px;border-radius:4px;
+                    background:${mainFormOG ? '#dbeafe' : '#f1f5f9'};
+                    color:${mainFormOG ? '#1e40af' : '#64748b'};font-weight:600;">
+                    ${mainFormOG
+                        ? '🔒 OH1 &amp; BB4 will be EXCLUDED from all imported pump calculations'
+                        : '🔓 OH1 &amp; BB4 will be INCLUDED in calculations'}
+                </div>
+            </div>
+
             <div style="display:flex;flex-direction:column;gap:0.75rem;">
                 <!-- Option A: New category -->
-                <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer;padding:0.75rem;border:1.5px solid #e2e8f0;border-radius:0.5rem;background:#f8fafc;" id="optNewLabel">
+                <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer;padding:0.75rem;border:1.5px solid #3b82f6;border-radius:0.5rem;background:#f8fafc;" id="optNewLabel">
                     <input type="radio" name="importMode" value="new" checked id="importModeNew"
                         style="margin-top:3px;accent-color:#1d4ed8;">
                     <div>
@@ -2685,10 +2731,21 @@ function showImportDialog(file) {
         </div>`;
 
     document.getElementById('modalFooter').innerHTML = `
-        <button id="importConfirmBtn" style="background:#1e3a8a;color:white;border:none;border-radius:0.4rem;padding:0.5rem 1.25rem;font-weight:700;cursor:pointer;">Import</button>
+        <button id="importConfirmBtn" style="background:#1e3a8a;color:white;border:none;border-radius:0.4rem;padding:0.5rem 1.25rem;font-weight:700;cursor:pointer;">⚙ Import &amp; Calculate</button>
         <button id="importCancelBtn" style="background:#f1f5f9;color:#374151;border:1px solid #e2e8f0;border-radius:0.4rem;padding:0.5rem 1rem;font-weight:600;cursor:pointer;margin-left:0.5rem;">Cancel</button>`;
 
     m.classList.remove('hidden');
+
+    // Live update status label when toggle changes
+    document.getElementById('importIsOilAndGas').addEventListener('change', function() {
+        const checked = this.checked;
+        const st = document.getElementById('ogToggleStatus');
+        st.style.background = checked ? '#dbeafe' : '#f1f5f9';
+        st.style.color      = checked ? '#1e40af' : '#64748b';
+        st.innerHTML = checked
+            ? '🔒 OH1 &amp; BB4 will be EXCLUDED from all imported pump calculations'
+            : '🔓 OH1 &amp; BB4 will be INCLUDED in calculations';
+    });
 
     // Highlight selected radio option
     document.querySelectorAll('input[name="importMode"]').forEach(r => {
@@ -2697,10 +2754,10 @@ function showImportDialog(file) {
             document.getElementById('optAppendLabel').style.borderColor = r.value==='append' ? '#3b82f6' : '#e2e8f0';
         });
     });
-    document.getElementById('optNewLabel').style.borderColor = '#3b82f6'; // default
 
     document.getElementById('importConfirmBtn').onclick = () => {
-        const mode = document.querySelector('input[name="importMode"]:checked').value;
+        const mode       = document.querySelector('input[name="importMode"]:checked').value;
+        const importOG   = document.getElementById('importIsOilAndGas').checked; // ← user decision
         let catName;
         if (mode === 'new') {
             catName = (document.getElementById('newCatInput').value || '').trim();
@@ -2714,7 +2771,7 @@ function showImportDialog(file) {
             if (!catName) { showNotification('Select a category to append to.', 'error'); return; }
         }
         m.classList.add('hidden');
-        readWB(file, wb => processWB(wb, catName, mode === 'append'));
+        readWB(file, wb => processWB(wb, catName, mode === 'append', importOG));
     };
     document.getElementById('importCancelBtn').onclick = () => m.classList.add('hidden');
 }
@@ -2726,7 +2783,7 @@ function readWB(file,cb) {
     r.readAsArrayBuffer(file);
 }
 
-function processWB(wb, catName, appendMode=false) {
+function processWB(wb, catName, appendMode=false, importOilAndGas=true) {
     const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {raw:false});
     if (importTarget === 'history' && catName) {
         // Add category if new
@@ -2764,15 +2821,10 @@ function processWB(wb, catName, appendMode=false) {
 
         const t0 = Date.now();
         const items = json.map((row, i) => {
-            // Parse IsOilAndGas from Excel — default true for O&G
-            let rowIsOG = true;
-            const ogRaw = row['IsOilAndGas'] ?? row['isOilAndGas'] ?? row['IS OIL GAS'] ?? '';
-            if (ogRaw !== '') {
-                const ogStr = String(ogRaw).trim().toUpperCase();
-                rowIsOG = !(ogStr === 'FALSE' || ogStr === '0' || ogStr === 'NO' || ogStr === 'F');
-            }
-            // BUG FIX v3.1: ensure rowIsOG is strictly boolean (not string/number)
-            const item = { id:t0-i, isOilAndGas:Boolean(rowIsOG), category:catName, _customData:{}, _originalData:{} };
+            // isOilAndGas: use the value chosen by the user in the Import dialog
+            // (importOilAndGas parameter) — overrides any per-row Excel column value.
+            // This is the single source of truth for the entire import batch.
+            const item = { id:t0-i, isOilAndGas:Boolean(importOilAndGas), category:catName, _customData:{}, _originalData:{} };
             let hasD = false;
 
             for (const hdr in row) {
@@ -3086,6 +3138,28 @@ function initializeApp() {
                     showNotification('Added to Reference Library!','success');}}
         });
         hl.addEventListener('change',e=>{
+            // ── O&G toggle per item ──────────────────────────────────────────────
+            if(e.target.classList.contains('og-toggle-checkbox')){
+                const id  = parseFloat(e.target.dataset.id);
+                const idx = selectionHistory.findIndex(i=>i.id===id);
+                if(idx>-1){
+                    const newOG = e.target.checked;
+                    selectionHistory[idx].isOilAndGas = newOG;
+                    // Recalculate immediately with new O&G setting
+                    const res = calculatePumpSelection(selectionHistory[idx]);
+                    if(!res.error){ Object.assign(selectionHistory[idx], res); }
+                    selectionHistory[idx].isOilAndGas = newOG; // restore after assign
+                    safeSetLocalStorage(PUMP_HISTORY_KEY,JSON.stringify(selectionHistory));
+                    renderHistoryList();
+                    showNotification(
+                        newOG ? '🛢 O&G ON — OH1 & BB4 excluded, recalculated.'
+                              : '🔓 General mode — all types included, recalculated.',
+                        'success'
+                    );
+                }
+                return;
+            }
+            // ── Category select per item ────────────────────────────────────────
             if(e.target.classList.contains('category-select-individual')){
                 const idx=selectionHistory.findIndex(i=>i.id==e.target.dataset.id);
                 if(idx>-1){selectionHistory[idx].category=e.target.value;
